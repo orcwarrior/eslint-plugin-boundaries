@@ -40,21 +40,21 @@ Examples in the next sections are based on the previous options example and thes
 src/
 └── modules/
     ├── module-a/
-    │   ├── index.js
+    │   ├── index.ts
     │   └── ModuleA.js
     └── module-b/
-        ├── index.js
+        ├── index.ts
         ├── ModuleB.js
         └── modules
             ├── module-c
-            │   ├── index.js
+            │   ├── index.ts
             │   ├── ModuleC.js
             │   └── modules
             │       └── module-e
-            │           ├── index.js
+            │           ├── index.ts
             │           └── ModuleE.js
             └── module-d
-                ├── index.js
+                ├── index.ts
                 └── ModuleD.js
 ```
 

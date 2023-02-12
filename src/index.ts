@@ -16,7 +16,7 @@ const importRules = (ruleNames) => {
 // export all rules in lib/rules
 // export all configs
 
-module.exports = {
+export default {
   rules: importRules(rules),
   configs: {
     recommended: recommendedConfig,

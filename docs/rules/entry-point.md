@@ -39,8 +39,8 @@ It checks `import` statements to the elements of the project and ensure that eac
           {
             // when importing components or modules
             "target": ["components", "modules"],
-            // only allow index.js
-            "allow": "index.js"
+            // only allow index.ts
+            "allow": "index.ts"
           }
         ]
       }
@@ -57,17 +57,17 @@ src/
 ├── components/
 │   ├── atoms/
 │   │   ├── atom-a/
-│   │   │   ├── index.js
+│   │   │   ├── index.ts
 │   │   │   └── AtomA.js
 │   │   └── atom-b/
-│   │       ├── index.js
+│   │       ├── index.ts
 │   │       └── AtomB.js
 │   └── molecules/
 │       ├── molecule-a/
-│       │   ├── index.js
+│       │   ├── index.ts
 │       │   └── MoleculeA.js
 │       └── molecule-b/
-│           ├── index.js
+│           ├── index.ts
 │           └── MoleculeB.js
 ├── helpers/
 │   ├── data/
@@ -77,10 +77,10 @@ src/
 │       └── roles.js
 └── modules/
     ├── module-a/
-    │   ├── index.js
+    │   ├── index.ts
     │   └── ModuleA.js
     └── module-b/
-        ├── index.js
+        ├── index.ts
         └── ModuleB.js
 ```
 
@@ -118,7 +118,7 @@ src/
 
 ### Examples of **incorrect** code for this rule:
 
-_Any other file than index.js can't be imported from components_
+_Any other file than index.ts can't be imported from components_
 
 ```js
 // modules/module-a/ModuleA.js
@@ -126,7 +126,7 @@ import AtomA from 'components/atoms/atom-a/AtomA'
 
 ```
 
-_Any other file than index.js can't be imported from modules_
+_Any other file than index.ts can't be imported from modules_
 
 ```js
 // modules/module-a/ModuleA.js
@@ -156,7 +156,7 @@ _index.js from components can be imported:_
 
 ```js
 // src/components/atoms/atom-a/AtomA.js
-import ComponentB from 'components/atoms/atom-b/index.js'
+import ComponentB from 'components/atoms/atom-b/index.ts'
 
 ```
 

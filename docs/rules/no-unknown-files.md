@@ -38,13 +38,13 @@ src/
 │       └── roles.js
 │
 ├── foo.js
-└── index.js
+└── index.ts
 ```
 
 ```jsonc
 {
   "settings": {
-    "boundaries/ignore": ["src/index.js"],
+    "boundaries/ignore": ["src/index.ts"],
     "boundaries/elements": [
       {
         "type": "helpers",
@@ -72,10 +72,10 @@ _Helper files are allowed_
 // src/helpers/data/sort.js
 ```
 
-_`index.js` file is not recognized, but it is ignored in settings_
+_`index.ts` file is not recognized, but it is ignored in settings_
 
 ```js
-// src/index.js
+// src/index.ts
 ```
 
 ## Further reading

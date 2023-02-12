@@ -38,7 +38,7 @@ src/
 │       └── roles.js
 │
 ├── foo.js
-└── index.js
+└── index.ts
 ```
 
 ```jsonc
@@ -69,10 +69,10 @@ import foo from "../../foo"
 
 ### Examples of **correct** code for this rule:
 
-_`index.js` file is not recognized as any known element type, so it can import `foo.js`_
+_`index.ts` file is not recognized as any known element type, so it can import `foo.js`_
 
 ```js
-// src/index.js
+// src/index.ts
 import foo from "./foo"
 ```
 

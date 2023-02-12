@@ -32,10 +32,10 @@ src/
 ├── components/
 │   └─ atoms/
 │       ├── atom-a/
-│       │   ├── index.js
+│       │   ├── index.ts
 │       │   └── AtomA.js
 │       └── atom-b/
-│           ├── index.js
+│           ├── index.ts
 │           └── AtomB.js
 ├── helpers/
 │   ├── data/
@@ -45,7 +45,7 @@ src/
 │       └── roles.js
 │
 ├── foo.js
-└── index.js
+└── index.ts
 ```
 
 ```jsonc
@@ -78,7 +78,7 @@ _Helpers can't import `foo.js` file because it is unknown_
 import foo from '../../foo'
 ```
 
-_Components can't import `index.js` file because it is unknown_
+_Components can't import `index.ts` file because it is unknown_
 
 ```js
 // src/components/atoms/atom-a/AtomA.js
@@ -94,10 +94,10 @@ _Components can import helpers_
 import index from '../../../helpers/data/parse'
 ```
 
-_`index.js` file can import `foo.js` file because both are unknown_
+_`index.ts` file can import `foo.js` file because both are unknown_
 
 ```js
-// src/index.js
+// src/index.ts
 import foo from './foo'
 ```
 

@@ -114,17 +114,17 @@ src/
 ├── components/
 │   ├── atoms/
 │   │   ├── atom-a/
-│   │   │   ├── index.js
+│   │   │   ├── index.ts
 │   │   │   └── AtomA.js
 │   │   └── atom-b/
-│   │       ├── index.js
+│   │       ├── index.ts
 │   │       └── AtomB.js
 │   └── molecules/
 │       ├── molecule-a/
-│       │   ├── index.js
+│       │   ├── index.ts
 │       │   └── MoleculeA.js
 │       └── molecule-b/
-│           ├── index.js
+│           ├── index.ts
 │           └── MoleculeB.js
 ├── helpers/
 │   ├── data/
@@ -134,10 +134,10 @@ src/
 │       └── roles.js
 └── modules/
     ├── module-a/
-    │   ├── index.js
+    │   ├── index.ts
     │   └── ModuleA.js
     └── module-b/
-        ├── index.js
+        ├── index.ts
         └── ModuleB.js
 ```
 

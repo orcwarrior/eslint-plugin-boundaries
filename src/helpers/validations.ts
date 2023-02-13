@@ -1,59 +1,60 @@
-const micromatch = require("micromatch");
+import micromatch from "micromatch";
+import {JSONSchema4} from "json-schema";
+import {BoundariesConfigSettings, EslintPluginConfig} from "../configs/EslintPluginConfig";
+import {RuleOptions} from "../rules-factories/dependency-rule";
 
-const { TYPES, ALIAS, ELEMENTS, VALID_MODES } = require("../constants/settings");
+const {TYPES, ALIAS, ELEMENTS, VALID_MODES} = require("../constants/settings");
 
-const { getElementsTypeNames, isLegacyType } = require("./settings");
-const { rulesMainKey } = require("./rules");
-const { warnOnce } = require("./debug");
-const { isArray, isString } = require("./utils");
+const {getElementsTypeNames, isLegacyType} = require("./settings");
+const {rulesMainKey} = require("./rules");
+const {warnOnce} = require("./debug");
+const {isArray, isString} = require("./utils");
 
 const invalidMatchers = [];
 
-const DEFAULT_MATCHER_OPTIONS = {
-  type: "object",
-};
+const DEFAULT_MATCHER_OPTIONS: JSONSchema4 = {type: "object"};
 
-function elementsMatcherSchema(matcherOptions = DEFAULT_MATCHER_OPTIONS) {
+function elementsMatcherSchema(matcherOptions = DEFAULT_MATCHER_OPTIONS): JSONSchema4 {
   return {
     oneOf: [
-      {
-        type: "string", // single matcher
+      {type: "string" // single matcher
       },
       {
         type: "array", // multiple matchers
         items: {
           oneOf: [
-            {
-              type: "string", // matcher with options
+            {type: "string" // matcher with options
             },
             {
               type: "array",
               items: [
-                {
-                  type: "string", // matcher
+                {type: "string" // matcher
                 },
-                matcherOptions, // options
-              ],
-            },
-          ],
-        },
-      },
-    ],
+                matcherOptions // options
+              ]
+            }
+          ]
+        }
+      }
+    ]
   };
 }
 
-function rulesOptionsSchema(options = {}) {
+type RulesOptionsSchemaParam = {
+  rulesMainKey?: boolean,
+  targetMatcherOptions?: JSONSchema4
+}
+
+function rulesOptionsSchema(options: RulesOptionsSchemaParam = {}) {
   const mainKey = rulesMainKey(options.rulesMainKey);
   return [
     {
       type: "object",
       properties: {
-        message: {
-          type: "string",
-        },
+        message: {type: "string"},
         default: {
           type: "string",
-          enum: ["allow", "disallow"],
+          enum: ["allow", "disallow"]
         },
         rules: {
           type: "array",
@@ -63,33 +64,25 @@ function rulesOptionsSchema(options = {}) {
               [mainKey]: elementsMatcherSchema(),
               allow: elementsMatcherSchema(options.targetMatcherOptions),
               disallow: elementsMatcherSchema(options.targetMatcherOptions),
-              message: {
-                type: "string",
-              },
+              message: {type: "string"}
             },
             additionalProperties: false,
             anyOf: [
-              {
-                required: [mainKey, "allow", "disallow"],
-              },
-              {
-                required: [mainKey, "allow"],
-              },
-              {
-                required: [mainKey, "disallow"],
-              },
-            ],
-          },
-        },
+              {required: [mainKey, "allow", "disallow"]},
+              {required: [mainKey, "allow"]},
+              {required: [mainKey, "disallow"]}
+            ]
+          }
+        }
       },
-      additionalProperties: false,
-    },
+      additionalProperties: false
+    }
   ];
 }
 
 function isValidElementTypesMatcher(matcher, settings) {
-  const mathcherToCheck = isArray(matcher) ? matcher[0] : matcher;
-  return !matcher || micromatch.some(getElementsTypeNames(settings), mathcherToCheck);
+  const [matcherToCheck] = isArray(matcher) ? matcher : [matcher];
+  return !matcher || micromatch.some(getElementsTypeNames(settings), matcherToCheck);
 }
 
 function validateElementTypesMatcher(elementsMatcher, settings) {
@@ -100,7 +93,8 @@ function validateElementTypesMatcher(elementsMatcher, settings) {
   }
 }
 
-function validateElements(elements) {
+
+function validateElements(elements: BoundariesConfigSettings["boundaries/elements"]): void {
   if (!elements || !isArray(elements) || !elements.length) {
     warnOnce(`Please provide element types using the '${ELEMENTS}' setting`);
     return;
@@ -148,13 +142,13 @@ function deprecateTypes(types) {
   }
 }
 
-function validateSettings(settings) {
+function validateSettings(settings: EslintPluginConfig["settings"]) {
   deprecateTypes(settings[TYPES]);
   deprecateAlias(settings[ALIAS]);
   validateElements(settings[ELEMENTS] || settings[TYPES]);
 }
 
-function validateRules(settings, rules = [], options = {}) {
+function validateRules(settings: BoundariesConfigSettings, rules = [], options: RuleOptions["validateRules"] = {}) {
   const mainKey = rulesMainKey(options.mainKey);
   rules.forEach((rule) => {
     validateElementTypesMatcher([rule[mainKey]], settings);
@@ -165,10 +159,10 @@ function validateRules(settings, rules = [], options = {}) {
   });
 }
 
-module.exports = {
+export {
   elementsMatcherSchema,
   rulesOptionsSchema,
   validateElementTypesMatcher,
   validateSettings,
-  validateRules,
+  validateRules
 };

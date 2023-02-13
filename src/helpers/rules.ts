@@ -1,3 +1,6 @@
+import {FullRuleName, RuleName} from "../constants/rules";
+import {Rule} from "eslint";
+
 const micromatch = require("micromatch");
 
 const {
@@ -8,30 +11,33 @@ const {
 const REPO_URL = "https://github.com/javierbrea/eslint-plugin-boundaries";
 const FROM = "from";
 
-function removePluginNamespace(ruleName) {
-  return ruleName.replace("boundaries/", "");
+function removePluginNamespace(ruleName: FullRuleName): RuleName {
+  return ruleName.replace("boundaries/", "") as RuleName;
 }
 
-function docsUrl(ruleName) {
+function docsUrl(ruleName: FullRuleName) {
   return `${REPO_URL}/blob/master/docs/rules/${removePluginNamespace(ruleName)}.md`;
 }
 
+type RuleMeta = {
+  ruleName: FullRuleName;
+  description: string;
+  schema: any;
+}
 function meta({
-                description,
-                schema = [],
-                ruleName
-              }) {
+  description,
+  schema = [],
+  ruleName
+}: RuleMeta): Rule.RuleMetaData {
   return {
-    meta: {
-      type: "problem",
-      docs: {
-        url: docsUrl(ruleName),
-        description,
-        category: "dependencies"
-      },
-      fixable: null,
-      schema
-    }
+    type: "problem",
+    docs: {
+      url: docsUrl(ruleName),
+      description,
+      category: "dependencies"
+    },
+    fixable: null,
+    schema
   };
 }
 
@@ -125,13 +131,9 @@ function isMatchElementKey(
     micromatchPatternReplacingObjectsValues(matcher, elementsToCompareCapturedValues)
   );
   if (isMatch && options) {
-    return {
-      result: isObjectMatch(options, elementInfo.capturedValues, elementsToCompareCapturedValues)
-    };
+    return {result: isObjectMatch(options, elementInfo.capturedValues, elementsToCompareCapturedValues)};
   }
-  return {
-    result: isMatch
-  };
+  return {result: isMatch};
 }
 
 function isMatchElementType(elementInfo, matcher, options, elementsToCompareCapturedValues) {
@@ -175,12 +177,12 @@ type ElementRulesAllowDependencyParam = {
 };
 
 function elementRulesAllowDependency({
-                                       element,
-                                       dependency,
-                                       options,
-                                       isMatch,
-                                       rulesMainKey: mainKey
-                                     }: ElementRulesAllowDependencyParam) {
+  element,
+  dependency,
+  options,
+  isMatch,
+  rulesMainKey: mainKey
+}: ElementRulesAllowDependencyParam) {
   const [result, report, ruleReport] = getElementRules(
     elementToGetRulesFrom(element, dependency, mainKey),
     options,
@@ -237,3 +239,4 @@ export {
   rulesMainKey,
   micromatchPatternReplacingObjectsValues
 };
+export type {RuleMeta};

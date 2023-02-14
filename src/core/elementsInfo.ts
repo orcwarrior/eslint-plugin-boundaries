@@ -1,15 +1,18 @@
-const isCoreModule = require("is-core-module");
-const micromatch = require("micromatch");
-const resolve = require("eslint-module-utils/resolve").default;
+import type {BoundariesRuleContext} from "../rules-factories/dependency-rule";
+import isCoreModule from "is-core-module";
+import micromatch from "micromatch";
+import resolve from "eslint-module-utils/resolve";
+import {IGNORE, INCLUDE, VALID_MODES} from "../constants/settings";
+import {getElements} from "../helpers/settings";
+import {debugFileInfo} from "../helpers/debug";
+import {elementsCache, filesCache, importsCache} from "./cache";
+import {
+  BoundariesConfigSettings, BoundariesElement,
+  ElementType
+} from "../configs/EslintPluginConfig";
 
-const { IGNORE, INCLUDE, VALID_MODES } = require("../constants/settings");
-const { getElements } = require("../helpers/settings");
-const { debugFileInfo } = require("../helpers/debug");
-const { isArray } = require("../helpers/utils");
 
-const { filesCache, importsCache, elementsCache } = require("./cache");
-
-function baseModule(name, path) {
+function baseModule(name: string, path?: string): string | null {
   if (path) {
     return null;
   }
@@ -21,11 +24,11 @@ function baseModule(name, path) {
   return pkg;
 }
 
-function matchesIgnoreSetting(path, settings) {
+function matchesIgnoreSetting(path: string, settings: BoundariesConfigSettings): boolean {
   return micromatch.isMatch(path, settings[IGNORE] || []);
 }
 
-function isIgnored(path, settings) {
+function isIgnored(path: string, settings: BoundariesConfigSettings): boolean {
   if (!path) {
     return true;
   }
@@ -39,13 +42,16 @@ function isIgnored(path, settings) {
 }
 
 function isBuiltIn(name, path) {
-  if (path || !name) return false;
+  if (path || !name) {
+    return false;
+  }
   const base = baseModule(name);
   return isCoreModule(base);
 }
 
 const scopedRegExp = /^@[^/]*\/?[^/]+/;
-function isScoped(name) {
+
+function isScoped(name): boolean {
   return name && scopedRegExp.test(name);
 }
 
@@ -58,7 +64,9 @@ function isExternal(name, path) {
   );
 }
 
-function elementCaptureValues(capture, captureSettings) {
+/** Maps captured subpaths to object with keys based on "boundaries/elements".capture */
+function elementCaptureValues(capture: string[], captureSettings: BoundariesElement["capture"]
+): Record<string, string> {
   if (!captureSettings) {
     return null;
   }
@@ -70,7 +78,8 @@ function elementCaptureValues(capture, captureSettings) {
   }, {});
 }
 
-function getElementPath(pattern, pathSegmentsMatching, fullPath) {
+/** Reverts path manipulations done by elementTypeAndParents() reducer sub-path of matched element ?? */
+function getElementPath(pattern: string, pathSegmentsMatching: string[], fullPath: string[]) {
   // Get full left side of the path matching pattern (full element path except internal files)
   const elementPathRegexp = micromatch.makeRe(pattern);
   const testedSegments = [];
@@ -87,50 +96,66 @@ function getElementPath(pattern, pathSegmentsMatching, fullPath) {
   return `${[...fullPath].reverse().join("/").split(result)[0]}${result}`;
 }
 
-function elementTypeAndParents(path, settings) {
-  const parents = [];
-  const elementResult = {
+type ElementResult = {
+  type: ElementType | null;
+  /** Sub-path of the found element ???*/
+  elementPath: any | null;
+  /** micromatch captured element subfolders list*/
+
+  capture: string[] | null;
+  /** micromatch captured element subfolders as object keyed by settings "boundaries/elements".capture */
+  capturedValues: any | null;
+  /** TODO: Not entirely sure what it's*/
+  internalPath: any | null;
+
+  parents: Omit<ElementResult, "parents" | "internalPath">[]
+}
+
+function elementTypeAndParents(path: string, settings: BoundariesConfigSettings): ElementResult {
+  const parents: ElementResult["parents"] = [];
+  const elementResult: ElementResult = {
     type: null,
     elementPath: null,
     capture: null,
     capturedValues: null,
     internalPath: null,
+    parents
   };
 
   if (isIgnored(path, settings)) {
-    return {
-      ...elementResult,
-      parents,
-    };
+    return elementResult;
   }
 
   path
     .split("/")
     .reverse()
     .reduce(
-      ({ accumulator, lastSegmentMatching }, elementPathSegment, segmentIndex, elementPaths) => {
+      ({accumulator, lastSegmentMatching}, elementPathSegment, segmentIndex, elementPaths) => {
         accumulator.unshift(elementPathSegment);
         let elementFound = false;
         getElements(settings).forEach((element) => {
-          const typeOfMatch = VALID_MODES.includes(element.mode) ? element.mode : VALID_MODES[0];
-          const elementPatterns = isArray(element.pattern) ? element.pattern : [element.pattern];
+          const typeOfMatch = element.mode ?? VALID_MODES[0];
+          const elementPatterns = Array.isArray(element.pattern)
+            ? element.pattern
+            : [element.pattern];
+
           elementPatterns.forEach((elementPattern) => {
             if (!elementFound) {
               const useFullPathMatch = typeOfMatch === VALID_MODES[2] && !elementResult.type;
-              const pattern =
-                typeOfMatch === VALID_MODES[0] && !elementResult.type
-                  ? `${elementPattern}/**/*`
-                  : elementPattern;
-              let basePatternCapture = true;
+              const pattern = typeOfMatch === VALID_MODES[0] && !elementResult.type
+                ? `${elementPattern}/**/*`
+                : elementPattern;
+              let basePatternCapture = true, basePatternCaptureMatch;
 
               if (element.basePattern) {
-                basePatternCapture = micromatch.capture(
+                basePatternCaptureMatch = micromatch.capture(
                   [element.basePattern, "**", pattern].join("/"),
                   path
                     .split("/")
                     .slice(0, path.split("/").length - lastSegmentMatching)
                     .join("/")
                 );
+                basePatternCapture = !!basePatternCaptureMatch;
               }
               const capture = micromatch.capture(
                 pattern,
@@ -143,8 +168,8 @@ function elementTypeAndParents(path, settings) {
                 let capturedValues = elementCaptureValues(capture, element.capture);
                 if (element.basePattern) {
                   capturedValues = {
-                    ...elementCaptureValues(basePatternCapture, element.baseCapture),
-                    ...capturedValues,
+                    ...elementCaptureValues(basePatternCaptureMatch, element.baseCapture),
+                    ...capturedValues
                   };
                 }
                 const elementPath = useFullPathMatch
@@ -165,41 +190,56 @@ function elementTypeAndParents(path, settings) {
                     type: element.type,
                     elementPath: elementPath,
                     capture: capture,
-                    capturedValues: capturedValues,
+                    capturedValues: capturedValues
                   });
                 }
               }
             }
           });
         });
-        return { accumulator, lastSegmentMatching };
+        return {accumulator, lastSegmentMatching};
       },
-      { accumulator: [], lastSegmentMatching: 0 }
+      {accumulator: [], lastSegmentMatching: 0}
     );
 
   return {
     ...elementResult,
-    parents,
+    parents
   };
 }
 
-function replacePathSlashes(absolutePath) {
+function replacePathSlashes(absolutePath: string): string {
   return absolutePath.replace(/\\/g, "/");
 }
 
-function projectPath(absolutePath) {
+/** From absolute path to project-relative path */
+function projectPath(absolutePath: string): string {
   if (absolutePath) {
     return replacePathSlashes(absolutePath).replace(`${replacePathSlashes(process.cwd())}/`, "");
   }
 }
 
-function importInfo(source, context) {
+type FileInfo = ElementResult & {
+  /** Project-relative path*/
+  path: string;
+  isIgnored: boolean;
+};
+type ImportInfo = FileInfo & {
+  source,
+  isLocal: boolean;
+  isBuiltIn: boolean;
+  isExternal: boolean;
+  /** Base module in case it's an external module import */
+  baseModule: string | null;
+};
+
+function importInfo(source, context): ImportInfo {
   const path = projectPath(resolve(source, context));
   const isExternalModule = isExternal(source, path);
   const resultCache = importsCache.load(isExternalModule ? source : path, context.settings);
   let elementCache;
-  let result;
-  let elementResult;
+  let result: ImportInfo;
+  let elementResult: ElementResult;
 
   if (resultCache) {
     result = resultCache;
@@ -222,7 +262,9 @@ function importInfo(source, context) {
       isBuiltIn: isBuiltInModule,
       isExternal: isExternalModule,
       baseModule: baseModule(source, pathToUse),
-      ...elementResult,
+      // TODO: Consider suggestion to simplify the code (2nd argument could be dropped then)
+      // baseModule: isExternalModule ? baseModule(source) : null,
+      ...elementResult
     };
 
     importsCache.save(path, result, context.settings);
@@ -234,12 +276,12 @@ function importInfo(source, context) {
   return result;
 }
 
-function fileInfo(context) {
+function fileInfo(context: BoundariesRuleContext): FileInfo {
   const path = projectPath(context.getFilename());
   const resultCache = filesCache.load(path, context.settings);
   let elementCache;
-  let result;
-  let elementResult;
+  let result: FileInfo;
+  let elementResult: ElementResult;
   if (resultCache) {
     result = resultCache;
   } else {
@@ -253,7 +295,7 @@ function fileInfo(context) {
     result = {
       path,
       isIgnored: isIgnored(path, context.settings),
-      ...elementResult,
+      ...elementResult
     };
     filesCache.save(path, result, context.settings);
     debugFileInfo(result);
@@ -261,7 +303,7 @@ function fileInfo(context) {
   return result;
 }
 
-module.exports = {
+export {
   importInfo,
-  fileInfo,
+  fileInfo
 };

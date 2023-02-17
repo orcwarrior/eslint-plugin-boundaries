@@ -1,6 +1,11 @@
-import {ElementType, EslintPluginConfig} from "../configs/EslintPluginConfig";
-import {ELEMENTS, TYPES, VALID_MODES} from "../constants/settings";
-import {isString} from "./utils";
+import {
+  BoundariesConfigSettings,
+  BoundariesElement,
+  ElementType,
+  EslintPluginConfig
+} from "../configs/EslintPluginConfig";
+import { ELEMENTS, TYPES, VALID_MODES } from "../constants/settings";
+import { isString } from "./utils";
 
 
 function isLegacyType(type) {
@@ -30,7 +35,8 @@ function transformLegacyTypes(typesFromSettings: Settings["boundaries/elements"]
   });
 }
 
-function getElements(settings: EslintPluginConfig["settings"]) {
+/** Get Eslint Config object that */
+function getElements(settings: EslintPluginConfig["settings"]): BoundariesElement[] {
   return transformLegacyTypes(settings[ELEMENTS] || settings[TYPES]);
 }
 
@@ -38,7 +44,7 @@ function getElementsTypeNames(settings: EslintPluginConfig["settings"]): Element
   return getElements(settings).map((element) => element.type);
 }
 
-module.exports = {
+export {
   isLegacyType,
   getElements,
   getElementsTypeNames

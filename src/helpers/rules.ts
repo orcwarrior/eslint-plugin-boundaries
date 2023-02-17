@@ -1,21 +1,25 @@
-import {FullRuleName, RuleName} from "../constants/rules";
+import {FullRuleName, RULE_MAIN_KEY, RuleName} from "../constants/rules";
 import {Rule} from "eslint";
-
-const micromatch = require("micromatch");
-
-const {
-  isArray,
-  replaceObjectValuesInTemplates
-} = require("./utils");
+import micromatch from "micromatch";
+import {replaceObjectValuesInTemplates} from "./utils";
+import {CapturedValues, ElementInfo} from "../core/elementsInfo";
+import {DependencyInfo} from "../core/dependencyInfo";
+import {
+  ElementCaptureMatcher,
+  ElementType,
+  ElementTypeConfig,
+  RuleBoundariesBaseConfig,
+  RuleBoundariesRule
+} from "../configs/EslintPluginConfig";
 
 const REPO_URL = "https://github.com/javierbrea/eslint-plugin-boundaries";
-const FROM = "from";
+type MicromatchPattern = string | string[];
 
 function removePluginNamespace(ruleName: FullRuleName): RuleName {
   return ruleName.replace("boundaries/", "") as RuleName;
 }
 
-function docsUrl(ruleName: FullRuleName) {
+function docsUrl(ruleName: FullRuleName): string {
   return `${REPO_URL}/blob/master/docs/rules/${removePluginNamespace(ruleName)}.md`;
 }
 
@@ -24,11 +28,8 @@ type RuleMeta = {
   description: string;
   schema: any;
 }
-function meta({
-  description,
-  schema = [],
-  ruleName
-}: RuleMeta): Rule.RuleMetaData {
+
+function meta({description, schema = [], ruleName}: RuleMeta): Rule.RuleMetaData {
   return {
     type: "problem",
     docs: {
@@ -58,7 +59,9 @@ function dependencyLocation(node, context) {
   };
 }
 
-function micromatchPatternReplacingObjectsValues(pattern, object) {
+function micromatchPatternReplacingObjectsValues(
+  pattern: MicromatchPattern,
+  object: Partial<ElementsToCompareCapturedValues>) {
   let patternToReplace = pattern;
   // Backward compatibility
   if (object.from) {
@@ -72,11 +75,15 @@ function micromatchPatternReplacingObjectsValues(pattern, object) {
   }, patternToReplace);
 }
 
-function isObjectMatch(objectWithMatchers, object, objectsWithValuesToReplace) {
-  return Object.keys(objectWithMatchers).reduce((isMatch, key) => {
+
+function isObjectMatch(
+  captures: ElementCaptureMatcher,
+  object: CapturedValues,
+  objectsWithValuesToReplace: ElementsToCompareCapturedValues): boolean {
+  return Object.keys(captures).reduce((isMatch, key) => {
     if (isMatch) {
       const micromatchPattern = micromatchPatternReplacingObjectsValues(
-        objectWithMatchers[key],
+        captures[key],
         objectsWithValuesToReplace
       );
       return micromatch.isMatch(object[key], micromatchPattern);
@@ -85,147 +92,165 @@ function isObjectMatch(objectWithMatchers, object, objectsWithValuesToReplace) {
   }, true);
 }
 
-function rulesMainKey(key) {
-  return key || FROM;
-}
+type RuleMatchResult = {
+  result: boolean;
+  /** TODO: couldnt find any case of that value*/
+  report?: any | null;
+};
+type ElementsToCompareCapturedValues = { from: CapturedValues, target: CapturedValues };
+type IsMatchFn = (targetElement: ElementInfo,
+  element: ElementType,
+  captureValues: ElementCaptureMatcher,
+  elementsToCmpCapturedVals: ElementsToCompareCapturedValues
+) => RuleMatchResult;
 
-function ruleMatch(ruleMatchers, targetElement, isMatch, fromElement) {
-  let match = {
+function ruleMatch(
+  ruleMatchers: ElementTypeConfig | ElementTypeConfig[],
+  targetElement: ElementInfo,
+  isMatch: IsMatchFn,
+  fromElement: ElementInfo): RuleMatchResult {
+  let match: RuleMatchResult = {
     result: false,
     report: null
   };
-  const matchers = !isArray(ruleMatchers) ? [ruleMatchers] : ruleMatchers;
+
+  const matchers = wrapRulesInArray(ruleMatchers);
   matchers.forEach((matcher) => {
     if (!match.result) {
-      if (isArray(matcher)) {
-        const [value, captures] = matcher;
-        match = isMatch(targetElement, value, captures, {
-          from: fromElement.capturedValues,
-          target: targetElement.capturedValues
-        });
-      } else {
-        match = isMatch(
-          targetElement,
-          matcher,
-          {},
-          {
-            from: fromElement.capturedValues,
-            target: targetElement.capturedValues
-          }
-        );
-      }
+      const [value, captures = {}] = Array.isArray(matcher) ? matcher : [matcher];
+      match = isMatch(targetElement, value, captures, {
+        from: fromElement.capturedValues,
+        target: targetElement.capturedValues
+      });
     }
   });
   return match;
 }
 
+/** Ensures configured rules are wrapped in an array, also in case of rules like:
+ *  ["components", { "family": "${from.family}" }] so they'll be wrapped in additional array*/
+function wrapRulesInArray(rules: ElementTypeConfig | ElementTypeConfig[]): ElementTypeConfig[] {
+  if (!Array.isArray(rules)) {
+    return [rules];
+  } else if (Array.isArray(rules) && typeof rules[1] == "object") {
+    return [rules as [ElementType, ElementCaptureMatcher]];
+  } else {
+    return rules as ElementTypeConfig[];
+  }
+}
+
 function isMatchElementKey(
-  elementInfo,
-  matcher,
-  options,
-  elementKey,
-  elementsToCompareCapturedValues
-) {
+  elementInfo: ElementInfo,
+  matcher: MicromatchPattern,
+  captures: ElementCaptureMatcher,
+  elementKey: string,
+  elementsToCompareCapturedValues: ElementsToCompareCapturedValues
+): { result: boolean } {
   const isMatch = micromatch.isMatch(
     elementInfo[elementKey],
     micromatchPatternReplacingObjectsValues(matcher, elementsToCompareCapturedValues)
   );
-  if (isMatch && options) {
-    return {result: isObjectMatch(options, elementInfo.capturedValues, elementsToCompareCapturedValues)};
+  if (isMatch && captures) {
+    return {result: isObjectMatch(captures, elementInfo.capturedValues, elementsToCompareCapturedValues)};
   }
   return {result: isMatch};
 }
 
-function isMatchElementType(elementInfo, matcher, options, elementsToCompareCapturedValues) {
-  return isMatchElementKey(elementInfo, matcher, options, "type", elementsToCompareCapturedValues);
+
+function isMatchElementType(elementInfo: ElementInfo,
+  matcher: MicromatchPattern,
+  // TODO: this should be captures: ElementCaptureMatcher instead???
+  captures: ElementCaptureMatcher,
+  elementsToCompareCapturedValues: ElementsToCompareCapturedValues) {
+  return isMatchElementKey(elementInfo, matcher, captures, "type", elementsToCompareCapturedValues);
 }
 
-function getElementRules(elementInfo, options, mainKey) {
+/** Picks rules that're according to specific ElementType*/
+function getElementRules(elementInfo: ElementInfo,
+  options: RuleBoundariesBaseConfig,
+  mainKey = RULE_MAIN_KEY): Array<RuleBoundariesRule & { index: number }> {
   if (!options.rules) {
     return [];
   }
-  const key = rulesMainKey(mainKey);
   return options.rules
-    .map((rule, index) => {
-      return {
-        ...rule,
-        index
-      };
-    })
+    .map((rule, index) => ({...rule, index}))
     .filter((rule) => {
-      return ruleMatch(rule[key], elementInfo, isMatchElementType, elementInfo).result;
+      return ruleMatch(rule[mainKey], elementInfo, isMatchElementType, elementInfo).result;
     });
 }
 
-function isFromRule(mainKey) {
-  return rulesMainKey(mainKey) === FROM;
+/** checks if rule main key is "from" (RULE_MAIN_KEY)*/
+function isFromRule(mainKey): boolean {
+  return mainKey === RULE_MAIN_KEY;
 }
 
-function elementToGetRulesFrom(element, dependency, mainKey) {
-  if (!isFromRule(mainKey)) {
-    return dependency;
-  }
-  return element;
+/**  Depending on the mainKey it picks:
+ * element: if (mainKey == "from" ) // RULE_MAIN_KEY
+ * dependency: otherwise
+ ]*/
+function elementToGetRulesFrom(element: ElementInfo, dependency: DependencyInfo, mainKey: string) {
+  return isFromRule(mainKey) ? element : dependency;
 }
 
 type ElementRulesAllowDependencyParam = {
-  element: any;
-  dependency: any;
-  options: any;
-  isMatch: any;
-  rulesMainKey?: any;
+  element: ElementInfo;
+  dependency: DependencyInfo;
+  options: RuleBoundariesBaseConfig;
+  isMatch: IsMatchFn;
+  mainKey?: string;
 };
+type ElementRulesAllowDependencyResult = {
+  /** was compliant with rules set?*/
+  result: boolean,
+  /** rule report ???*/
+  report?: any,
+  ruleReport?: {
+    message: string,
+    isDefault?: boolean,
+    // TODO: Ensure 2 types below are correct
+    element?: ElementTypeConfig[],
+    disallow?: ElementTypeConfig[],
+    index?: number,
+  }
+}
 
 function elementRulesAllowDependency({
   element,
   dependency,
   options,
   isMatch,
-  rulesMainKey: mainKey
-}: ElementRulesAllowDependencyParam) {
+  mainKey = RULE_MAIN_KEY
+}: ElementRulesAllowDependencyParam): ElementRulesAllowDependencyResult {
   const [result, report, ruleReport] = getElementRules(
     elementToGetRulesFrom(element, dependency, mainKey),
     options,
     mainKey
-  ).reduce(
-    (allowed, rule) => {
-      if (rule.disallow) {
-        const match = ruleMatch(rule.disallow, dependency, isMatch, element);
-        if (match.result) {
-          return [
-            false,
-            match.report,
-            {
-              element: rule[rulesMainKey(mainKey)],
-              disallow: rule.disallow,
-              index: rule.index,
-              message: rule.message || options.message
-            }
-          ];
-        }
+  ).reduce((allowed, rule) => {
+    if (rule.disallow) {
+      const match = ruleMatch(rule.disallow, dependency, isMatch, element);
+      if (match.result) {
+        return [false, match.report, {
+          element: rule[mainKey],
+          disallow: rule.disallow,
+          index: rule.index,
+          message: rule.message || options.message
+        }];
       }
-      if (rule.allow) {
-        const match = ruleMatch(rule.allow, dependency, isMatch, element);
-        if (match.result) {
-          return [true, match.report];
-        }
+    }
+    if (rule.allow) {
+      const match = ruleMatch(rule.allow, dependency, isMatch, element);
+      if (match.result) {
+        return [true, match.report];
       }
-      return allowed;
-    },
-    [
-      options.default === "allow",
-      null,
-      {
-        isDefault: true,
-        message: options.message
-      }
-    ]
-  );
-  return {
-    result,
-    report,
-    ruleReport
-  };
+    }
+    return allowed;
+
+  }, [options.default === "allow", null, {
+    isDefault: true,
+    message: options.message
+  }]);
+
+  return {result, report, ruleReport};
 }
 
 export {
@@ -236,7 +261,6 @@ export {
   isMatchElementType,
   elementRulesAllowDependency,
   getElementRules,
-  rulesMainKey,
   micromatchPatternReplacingObjectsValues
 };
-export type {RuleMeta};
+export type {MicromatchPattern, RuleMeta, ElementsToCompareCapturedValues};

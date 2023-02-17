@@ -1,5 +1,7 @@
-const { isString, isArray, replaceObjectValuesInTemplates } = require("./utils");
-const { micromatchPatternReplacingObjectsValues } = require("./rules");
+import {isArray, isString, replaceObjectValuesInTemplates} from "./utils";
+import {micromatchPatternReplacingObjectsValues} from "./rules";
+import {CapturedValues} from "../core/elementsInfo";
+
 
 function quote(str) {
   return `'${str}'`;
@@ -9,7 +11,7 @@ function typeMessage(elementMatcher) {
   return `elements of type ${quote(elementMatcher)}`;
 }
 
-function propertiesConcater(properties, index) {
+function propertiesConcater(properties: any[], index: number): string {
   if (properties.length > 1 && index === properties.length - 1) {
     return " and";
   }
@@ -19,12 +21,14 @@ function propertiesConcater(properties, index) {
   return ",";
 }
 
-function micromatchPatternMessage(micromatchPatterns, elementCapturedValues) {
+function micromatchPatternMessage(
+  micromatchPatterns: string | string[],
+  elementCapturedValues: CapturedValues): string {
   const micromatchPatternsWithValues = micromatchPatternReplacingObjectsValues(
     micromatchPatterns,
-    { from: elementCapturedValues }
+    {from: elementCapturedValues}
   );
-  if (isArray(micromatchPatternsWithValues)) {
+  if (Array.isArray(micromatchPatternsWithValues)) {
     if (micromatchPatternsWithValues.length === 1) {
       return quote(micromatchPatternsWithValues[0]);
     }
@@ -41,7 +45,9 @@ function micromatchPatternMessage(micromatchPatterns, elementCapturedValues) {
   return quote(micromatchPatternsWithValues);
 }
 
-function capturedValuesMatcherMessage(capturedValuesPattern, elementCapturedValues) {
+function capturedValuesMatcherMessage(
+  capturedValuesPattern: string | string[],
+  elementCapturedValues: CapturedValues): string {
   const capturedValuesPatternKeys = Object.keys(capturedValuesPattern);
   return capturedValuesPatternKeys
     .map((key) => {
@@ -84,11 +90,11 @@ function elementPropertiesToReplaceInTemplate(element) {
     ...element.capturedValues,
     type: element.type,
     internalPath: element.internalPath,
-    source: element.source,
+    source: element.source
   };
 }
 
-function customErrorMessage(message, file, dependency, report = {}) {
+function customErrorMessage(message, file, dependency, report = {}): string {
   let replacedMessage = replaceObjectValuesInTemplates(
     replaceObjectValuesInTemplates(message, elementPropertiesToReplaceInTemplate(file), "file"),
     elementPropertiesToReplaceInTemplate(dependency),
@@ -127,7 +133,8 @@ function customErrorMessage(message, file, dependency, report = {}) {
       "target.parent"
     );
   }
-  return replaceObjectValuesInTemplates(replacedMessage, report, "report");
+  // TODO: Seems like method could return string[], is safe to assume returned value will be a string?
+  return replaceObjectValuesInTemplates(replacedMessage, report, "report") as string;
 }
 
 function elementCapturedValuesMessage(capturedValues) {
@@ -152,9 +159,9 @@ function elementMessage(elementInfo) {
   )}`;
 }
 
-module.exports = {
+export {
   quote,
   ruleElementMessage,
   customErrorMessage,
-  elementMessage,
+  elementMessage
 };

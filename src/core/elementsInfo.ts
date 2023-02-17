@@ -96,10 +96,10 @@ function getElementPath(pattern: string, pathSegmentsMatching: string[], fullPat
   return `${[...fullPath].reverse().join("/").split(result)[0]}${result}`;
 }
 
-type ElementResult = {
+type ElementInfo = {
   type: ElementType | null;
   /** Sub-path of the found element ???*/
-  elementPath: any | null;
+  elementPath: string | null;
   /** micromatch captured element subfolders list*/
 
   capture: string[] | null;
@@ -108,12 +108,12 @@ type ElementResult = {
   /** TODO: Not entirely sure what it's*/
   internalPath: any | null;
 
-  parents: Omit<ElementResult, "parents" | "internalPath">[]
+  parents: Omit<ElementInfo, "parents" | "internalPath">[]
 }
 
-function elementTypeAndParents(path: string, settings: BoundariesConfigSettings): ElementResult {
-  const parents: ElementResult["parents"] = [];
-  const elementResult: ElementResult = {
+function elementTypeAndParents(path: string, settings: BoundariesConfigSettings): ElementInfo {
+  const parents: ElementInfo["parents"] = [];
+  const elementResult: ElementInfo = {
     type: null,
     elementPath: null,
     capture: null,
@@ -219,7 +219,7 @@ function projectPath(absolutePath: string): string {
   }
 }
 
-type FileInfo = ElementResult & {
+type FileInfo = ElementInfo & {
   /** Project-relative path*/
   path: string;
   isIgnored: boolean;
@@ -233,13 +233,13 @@ type ImportInfo = FileInfo & {
   baseModule: string | null;
 };
 
-function importInfo(source, context): ImportInfo {
+function importInfo(source: string, context: BoundariesRuleContext): ImportInfo {
   const path = projectPath(resolve(source, context));
   const isExternalModule = isExternal(source, path);
   const resultCache = importsCache.load(isExternalModule ? source : path, context.settings);
   let elementCache;
   let result: ImportInfo;
-  let elementResult: ElementResult;
+  let elementResult: ElementInfo;
 
   if (resultCache) {
     result = resultCache;
@@ -281,7 +281,7 @@ function fileInfo(context: BoundariesRuleContext): FileInfo {
   const resultCache = filesCache.load(path, context.settings);
   let elementCache;
   let result: FileInfo;
-  let elementResult: ElementResult;
+  let elementResult: ElementInfo;
   if (resultCache) {
     result = resultCache;
   } else {
@@ -307,3 +307,4 @@ export {
   importInfo,
   fileInfo
 };
+export type {ElementInfo, FileInfo, ImportInfo};

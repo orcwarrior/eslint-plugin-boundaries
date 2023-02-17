@@ -10,16 +10,13 @@ import {customErrorMessage, elementMessage, ruleElementMessage} from "../helpers
 import {RuleErrorReporterFunction, RuleMatchingFunction} from "./types";
 
 
-function isMatchElementInternalPath(elementInfo, matcher, options, elementsCapturedValues) {
-  return isMatchElementKey(elementInfo, matcher, options, "internalPath", elementsCapturedValues);
-}
-
 const elementRulesAllowEntryPoint: RuleMatchingFunction = (element, dependency, options) => {
   return elementRulesAllowDependency({
     element,
     dependency,
     options,
-    isMatch: isMatchElementInternalPath,
+    isMatch: (elementInfo, matcher, options, elementsCapturedValues) =>
+      isMatchElementKey(elementInfo, matcher, options, "internalPath", elementsCapturedValues),
     rulesMainKey: "target"
   });
 };
@@ -40,7 +37,7 @@ const errorMessage: RuleErrorReporterFunction = (ruleData, file, dependency) => 
   )}. Disallowed in rule ${ruleReport.index + 1}`;
 };
 
-module.exports = dependencyRule(
+export default dependencyRule(
   {
     ruleName: RULE_ENTRY_POINT,
     description: `Check entry point used for each element type`,

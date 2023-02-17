@@ -1,28 +1,38 @@
-import {ESLintUtils} from "@typescript-eslint/utils";
+import {Rule} from "eslint";
 import {validateRules, validateSettings} from "../helpers/validations";
-import {RuleMeta} from "../helpers/rules";
-import {BoundariesConfigSettings} from "../configs/EslintPluginConfig";
-import {RuleContext} from "@typescript-eslint/utils/dist/ts-eslint/Rule";
+import {meta, RuleMeta} from "../helpers/rules";
+import {BoundariesConfigSettings, RuleBoundariesBaseConfig} from "../configs/EslintPluginConfig";
+import {FileInfo, fileInfo} from "../core/elementsInfo";
+import {DependencyInfo, dependencyInfo} from "../core/dependencyInfo";
 
-const {fileInfo} = require("../core/elementsInfo");
-const {dependencyInfo} = require("../core/dependencyInfo");
-
-
-const {meta} = require("../helpers/rules");
-
-const createRule = ESLintUtils.RuleCreator(
-  // TODO: Link to docs?
-  name => `https://example.com/rule/${name}`
-);
+// TODO: Further action on this, causes types mismatch (ts-lint vs. eslint)
+// const createRule: Rule.RuleModule = ESLintUtils.RuleCreator(
+//   () => `https://github.com/javierbrea/eslint-plugin-boundaries`
+// );
 type RuleOptions = {
   validate?: boolean;
   validateRules?: { mainKey?: string, onlyMainKey?: boolean };
 }
-type BoundariesRuleContext = RuleContext<string, any> & {
+type BoundariesRuleContext = Rule.RuleContext & {
   settings: BoundariesConfigSettings;
 }
-const dependencyRule = (ruleMeta: RuleMeta, rule, ruleOptions: RuleOptions = {}) => createRule({
-  create: (context: BoundariesRuleContext) => {
+// TODO: Finalize types
+type RuleFunctionParam = {
+  /** Imported/Exported dependency that's currently checked*/
+  dependency: DependencyInfo;
+  file: FileInfo;
+  node: Rule.Node;
+  context: BoundariesRuleContext;
+  /** Rule options array w/o severity level (first element)*/
+  options: RuleBoundariesBaseConfig;// | [];
+};
+type RuleFunction = (param: RuleFunctionParam) => any;
+const dependencyRule = (
+  ruleMeta: RuleMeta,
+  rule: RuleFunction,
+  ruleOptions: RuleOptions = {}) => ({
+
+  create: (context: BoundariesRuleContext): Rule.RuleListener => {
     const options = context.options[0];
     validateSettings(context.settings);
     const file = fileInfo(context);
@@ -46,4 +56,4 @@ const dependencyRule = (ruleMeta: RuleMeta, rule, ruleOptions: RuleOptions = {})
   defaultOptions: undefined
 });
 export {dependencyRule};
-export type {RuleOptions};
+export type {RuleOptions, BoundariesRuleContext};

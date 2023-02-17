@@ -2,11 +2,11 @@ import micromatch from "micromatch";
 import {JSONSchema4} from "json-schema";
 import {BoundariesConfigSettings, EslintPluginConfig} from "../configs/EslintPluginConfig";
 import {RuleOptions} from "../rules-factories/dependency-rule";
+import {RULE_MAIN_KEY} from "../constants/rules";
 
 const {TYPES, ALIAS, ELEMENTS, VALID_MODES} = require("../constants/settings");
 
 const {getElementsTypeNames, isLegacyType} = require("./settings");
-const {rulesMainKey} = require("./rules");
 const {warnOnce} = require("./debug");
 const {isArray, isString} = require("./utils");
 
@@ -17,8 +17,7 @@ const DEFAULT_MATCHER_OPTIONS: JSONSchema4 = {type: "object"};
 function elementsMatcherSchema(matcherOptions = DEFAULT_MATCHER_OPTIONS): JSONSchema4 {
   return {
     oneOf: [
-      {type: "string" // single matcher
-      },
+      {type: "string"},
       {
         type: "array", // multiple matchers
         items: {
@@ -41,12 +40,14 @@ function elementsMatcherSchema(matcherOptions = DEFAULT_MATCHER_OPTIONS): JSONSc
 }
 
 type RulesOptionsSchemaParam = {
-  rulesMainKey?: boolean,
+  rulesMainKey?: string,
   targetMatcherOptions?: JSONSchema4
 }
+const defaultRulesOptionsSchema: RulesOptionsSchemaParam = {rulesMainKey: RULE_MAIN_KEY};
 
-function rulesOptionsSchema(options: RulesOptionsSchemaParam = {}) {
-  const mainKey = rulesMainKey(options.rulesMainKey);
+function rulesOptionsSchema(_options: RulesOptionsSchemaParam = {}): JSONSchema4 {
+  const options = {...defaultRulesOptionsSchema, _options};
+  const {rulesMainKey} = options;
   return [
     {
       type: "object",
@@ -61,16 +62,16 @@ function rulesOptionsSchema(options: RulesOptionsSchemaParam = {}) {
           items: {
             type: "object",
             properties: {
-              [mainKey]: elementsMatcherSchema(),
+              [rulesMainKey]: elementsMatcherSchema(),
               allow: elementsMatcherSchema(options.targetMatcherOptions),
               disallow: elementsMatcherSchema(options.targetMatcherOptions),
               message: {type: "string"}
             },
             additionalProperties: false,
             anyOf: [
-              {required: [mainKey, "allow", "disallow"]},
-              {required: [mainKey, "allow"]},
-              {required: [mainKey, "disallow"]}
+              {required: [rulesMainKey, "allow", "disallow"]},
+              {required: [rulesMainKey, "allow"]},
+              {required: [rulesMainKey, "disallow"]}
             ]
           }
         }
@@ -80,12 +81,12 @@ function rulesOptionsSchema(options: RulesOptionsSchemaParam = {}) {
   ];
 }
 
-function isValidElementTypesMatcher(matcher, settings) {
+function isValidElementTypesMatcher(matcher, settings): boolean {
   const [matcherToCheck] = isArray(matcher) ? matcher : [matcher];
   return !matcher || micromatch.some(getElementsTypeNames(settings), matcherToCheck);
 }
 
-function validateElementTypesMatcher(elementsMatcher, settings) {
+function validateElementTypesMatcher(elementsMatcher, settings): void {
   const [matcher] = isArray(elementsMatcher) ? elementsMatcher : [elementsMatcher];
   if (!invalidMatchers.includes(matcher) && !isValidElementTypesMatcher(matcher, settings)) {
     invalidMatchers.push(matcher);
@@ -128,7 +129,7 @@ function validateElements(elements: BoundariesConfigSettings["boundaries/element
   });
 }
 
-function deprecateAlias(aliases) {
+function deprecateAlias(aliases): void {
   if (aliases) {
     warnOnce(
       `Defining aliases in '${ALIAS}' setting is deprecated. Please use 'import/resolver' setting`
@@ -136,23 +137,28 @@ function deprecateAlias(aliases) {
   }
 }
 
-function deprecateTypes(types) {
+function deprecateTypes(types): void {
   if (types) {
     warnOnce(`'${TYPES}' setting is deprecated. Please use '${ELEMENTS}' instead`);
   }
 }
 
-function validateSettings(settings: EslintPluginConfig["settings"]) {
+function validateSettings(settings: EslintPluginConfig["settings"]): void {
   deprecateTypes(settings[TYPES]);
   deprecateAlias(settings[ALIAS]);
   validateElements(settings[ELEMENTS] || settings[TYPES]);
 }
 
-function validateRules(settings: BoundariesConfigSettings, rules = [], options: RuleOptions["validateRules"] = {}) {
-  const mainKey = rulesMainKey(options.mainKey);
+const defaultRulesOptions: RuleOptions["validateRules"] = {mainKey: RULE_MAIN_KEY};
+
+function validateRules(settings: BoundariesConfigSettings,
+  rules = [],
+  _options: RuleOptions["validateRules"] = {}): void {
+  const options = {...defaultRulesOptions, _options};
+  const {mainKey} = options;
   rules.forEach((rule) => {
     validateElementTypesMatcher([rule[mainKey]], settings);
-    if (!options.onlyMainKey) {
+    if (!mainKey) {
       validateElementTypesMatcher(rule.allow, settings);
       validateElementTypesMatcher(rule.disallow, settings);
     }

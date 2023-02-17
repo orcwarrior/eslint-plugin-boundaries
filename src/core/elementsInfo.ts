@@ -95,6 +95,8 @@ function getElementPath(pattern: string, pathSegmentsMatching: string[], fullPat
   });
   return `${[...fullPath].reverse().join("/").split(result)[0]}${result}`;
 }
+/** micromatch captured element subfolders as object keyed by settings "boundaries/elements".capture */
+type CapturedValues = Record<string, string> | null;
 
 type ElementInfo = {
   type: ElementType | null;
@@ -104,7 +106,7 @@ type ElementInfo = {
 
   capture: string[] | null;
   /** micromatch captured element subfolders as object keyed by settings "boundaries/elements".capture */
-  capturedValues: any | null;
+  capturedValues: CapturedValues;
   /** TODO: Not entirely sure what it's*/
   internalPath: any | null;
 
@@ -307,4 +309,4 @@ export {
   importInfo,
   fileInfo
 };
-export type {ElementInfo, FileInfo, ImportInfo};
+export type {CapturedValues, ElementInfo, FileInfo, ImportInfo};

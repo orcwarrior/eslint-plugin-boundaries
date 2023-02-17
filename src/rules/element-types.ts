@@ -7,23 +7,19 @@ import {
   isMatchElementType
 } from "../helpers/rules";
 import {customErrorMessage, elementMessage, ruleElementMessage} from "../helpers/messages";
-import {ElementInfo} from "../core/elementsInfo";
-import {DependencyInfo} from "../core/dependencyInfo";
-import {RuleBoundariesBaseConfig} from "../configs/EslintPluginConfig";
+import { RuleErrorReporterFunction, RuleMatchingFunction } from "./types";
 
 
-function elementRulesAllowDependencyType(element: ElementInfo,
-  dependency: DependencyInfo,
-  options: RuleBoundariesBaseConfig): any {
+const elementRulesAllowDependencyType: RuleMatchingFunction = (element, dependency, options) => {
   return elementRulesAllowDependency({
     element,
     dependency,
     options,
     isMatch: isMatchElementType
   });
-}
+};
 
-function errorMessage(ruleData, file, dependency): string {
+const errorMessage: RuleErrorReporterFunction = (ruleData, file, dependency) => {
   const ruleReport = ruleData.ruleReport;
   if (ruleReport.message) {
     return customErrorMessage(ruleReport.message, file, dependency);

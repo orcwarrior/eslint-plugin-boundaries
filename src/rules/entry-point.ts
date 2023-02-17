@@ -1,30 +1,30 @@
-const { RULE_ENTRY_POINT } = require("../constants/settings");
-
-const dependencyRule = require("../rules-factories/dependency-rule");
-
-const { rulesOptionsSchema } = require("../helpers/validations");
-const {
+import {RULE_ENTRY_POINT} from "../constants/settings";
+import {dependencyRule} from "../rules-factories/dependency-rule";
+import {rulesOptionsSchema} from "../helpers/validations";
+import {
   dependencyLocation,
-  isMatchElementKey,
   elementRulesAllowDependency,
-} = require("../helpers/rules");
-const { customErrorMessage, ruleElementMessage, elementMessage } = require("../helpers/messages");
+  isMatchElementKey
+} from "../helpers/rules";
+import {customErrorMessage, elementMessage, ruleElementMessage} from "../helpers/messages";
+import {RuleErrorReporterFunction, RuleMatchingFunction} from "./types";
+
 
 function isMatchElementInternalPath(elementInfo, matcher, options, elementsCapturedValues) {
   return isMatchElementKey(elementInfo, matcher, options, "internalPath", elementsCapturedValues);
 }
 
-function elementRulesAllowEntryPoint(element, dependency, options) {
+const elementRulesAllowEntryPoint: RuleMatchingFunction = (element, dependency, options) => {
   return elementRulesAllowDependency({
     element,
     dependency,
     options,
     isMatch: isMatchElementInternalPath,
-    rulesMainKey: "target",
+    rulesMainKey: "target"
   });
-}
+};
 
-function errorMessage(ruleData, file, dependency) {
+const errorMessage: RuleErrorReporterFunction = (ruleData, file, dependency) => {
   const ruleReport = ruleData.ruleReport;
   if (ruleReport.message) {
     return customErrorMessage(ruleReport.message, file, dependency);
@@ -38,29 +38,25 @@ function errorMessage(ruleData, file, dependency) {
     ruleReport.element,
     dependency.capturedValues
   )}. Disallowed in rule ${ruleReport.index + 1}`;
-}
+};
 
 module.exports = dependencyRule(
   {
     ruleName: RULE_ENTRY_POINT,
     description: `Check entry point used for each element type`,
-    schema: rulesOptionsSchema({
-      rulesMainKey: "target",
-    }),
+    schema: rulesOptionsSchema({rulesMainKey: "target"})
   },
-  function ({ dependency, file, node, context, options }) {
+  function({dependency, file, node, context, options}) {
     if (!dependency.isIgnored && dependency.type && !dependency.isInternal) {
       const ruleData = elementRulesAllowEntryPoint(file, dependency, options);
       if (!ruleData.result) {
         context.report({
           message: errorMessage(ruleData, file, dependency),
           node: node,
-          ...dependencyLocation(node, context),
+          ...dependencyLocation(node, context)
         });
       }
     }
   },
-  {
-    validateRules: { onlyMainKey: true, mainKey: "target" },
-  }
+  {validateRules: {onlyMainKey: true, mainKey: "target"}}
 );

@@ -9,6 +9,7 @@ const rules = {
   NO_UNKNOWN_FILES: "no-unknown-files",
   NO_UNKNOWN: "no-unknown"
 } as const;
+
 type RuleKey = keyof typeof rules & string;
 type RuleName = typeof rules[RuleKey];
 type Rules = {
@@ -24,5 +25,6 @@ export const NO_IGNORED = rules.NO_IGNORED;
 export const NO_PRIVATE = rules.NO_PRIVATE;
 export const NO_UNKNOWN_FILES = rules.NO_UNKNOWN_FILES;
 export const NO_UNKNOWN = rules.NO_UNKNOWN;
+export const RULE_MAIN_KEY = "from";
 
 export type {Rules, RuleName, FullRuleName};

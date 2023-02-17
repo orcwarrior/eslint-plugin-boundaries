@@ -118,6 +118,7 @@ type ElementInfo = ElementInfoBase & {
   parents: ElementInfoBase[]
 }
 
+
 function elementTypeAndParents(path: string, settings: BoundariesConfigSettings): ElementInfo {
   const parents: ElementInfoBase[] = [];
   const elementResult: ElementInfo = {
@@ -224,7 +225,7 @@ function projectPath(absolutePath: string): string {
   }
 }
 
-type FileInfo = ElementInfo & {
+type FileInfo = ElementInfoBase & {
   /** Project-relative path*/
   path: string;
   isIgnored: boolean;
@@ -307,8 +308,8 @@ function fileInfo(context: BoundariesRuleContext): FileInfo {
   return result;
 }
 
+export type {CapturedValues, ElementInfoBase, ElementInfo, FileInfo, ImportInfo};
 export {
   importInfo,
   fileInfo
 };
-export type {CapturedValues, ElementInfoBase, ElementInfo, FileInfo, ImportInfo};

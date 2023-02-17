@@ -1,17 +1,19 @@
+import {BoundariesConfigSettings} from "../configs/EslintPluginConfig";
+
 class Cache {
-  constructor(name, settings) {
-    this._cache = {};
-    this._name = name;
-    this._settings = settings;
+  cache: Record<string, any>;
+
+  constructor(private name: string, public readonly settings: BoundariesConfigSettings) {
+    this.cache = {};
   }
 
   save(key, value) {
-    this._cache[key] = value;
+    this.cache[key] = value;
   }
 
   load(key) {
-    if (this._cache[key]) {
-      return this._cache[key];
+    if (this.cache[key]) {
+      return this.cache[key];
     }
 
     return null;
@@ -19,28 +21,29 @@ class Cache {
 }
 
 class CachesManager {
-  constructor(name) {
-    this._name = name;
-    this._caches = [];
+  private caches: Cache[];
+
+  constructor(private name: string) {
+    this.caches = [];
   }
 
-  findCacheForSettings(settings) {
-    let cache = this._caches.find((cacheCandidate) => {
-      return cacheCandidate._settings === settings;
+  findCacheForSettings(settings: BoundariesConfigSettings) {
+    let cache = this.caches.find((cacheCandidate) => {
+      return cacheCandidate.settings === settings;
     });
     if (!cache) {
-      cache = new Cache(this._name, settings);
-      this._caches.push(cache);
+      cache = new Cache(this.name, settings);
+      this.caches.push(cache);
     }
     return cache;
   }
 
-  save(key, value, settings) {
+  save(key: string, value, settings: BoundariesConfigSettings) {
     const cache = this.findCacheForSettings(settings);
     cache.save(key, value);
   }
 
-  load(key, settings) {
+  load(key: string, settings: BoundariesConfigSettings) {
     const cache = this.findCacheForSettings(settings);
     return cache.load(key);
   }
@@ -50,8 +53,8 @@ const filesCache = new CachesManager("file");
 const importsCache = new CachesManager("import");
 const elementsCache = new CachesManager("element");
 
-module.exports = {
+export {
   filesCache,
   importsCache,
-  elementsCache,
+  elementsCache
 };

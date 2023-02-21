@@ -22,7 +22,7 @@ function noPrivateMessage({ dep }) {
   return `Dependency is private of element of type ${dep}`;
 }
 
-module.exports = {
+export {
   customErrorMessage,
   elementTypesNoRuleMessage,
   entryPointNoRuleMessage,

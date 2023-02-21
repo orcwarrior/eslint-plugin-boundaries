@@ -12,6 +12,7 @@ const replaceAliases = (filePath, config) => {
   return filePath;
 };
 
+// Temporarily keep it as module.exports as tons of test configs rely on this being exported that way
 module.exports = {
   interfaceVersion: 2,
   resolve: function (source, _file, config) {

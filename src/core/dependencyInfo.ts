@@ -1,4 +1,4 @@
-import {ElementInfo, fileInfo, ImportInfo, importInfo} from "./elementsInfo";
+import { ElementInfo, ElementInfoBase, fileInfo, ImportInfo, importInfo } from "./elementsInfo";
 import {BoundariesRuleContext} from "../rules-factories/dependency-rule";
 
 
@@ -31,11 +31,11 @@ function isDescendant(elementA: ElementInfo, elementB: ElementInfo): boolean {
   return !!elementA.parents.find((parent) => parent.elementPath === elementB.elementPath);
 }
 
-function isChild(elementA: ElementInfo, elementB: ElementInfo): boolean {
+function isChild(elementA: ElementInfo, elementB: ElementInfoBase): boolean {
   return getParent(elementA) == elementB.elementPath;
 }
 
-function isInternal(elementA: ElementInfo, elementB: ElementInfo): boolean {
+function isInternal(elementA: ElementInfoBase, elementB: ElementInfoBase): boolean {
   return elementA.elementPath === elementB.elementPath;
 }
 

@@ -225,7 +225,7 @@ function projectPath(absolutePath: string): string {
   }
 }
 
-type FileInfo = ElementInfoBase & {
+type FileInfo = ElementInfo & {
   /** Project-relative path*/
   path: string;
   isIgnored: boolean;

@@ -1,6 +1,6 @@
 import {PLUGIN_NAME} from "../constants/plugin";
 import chalk from "chalk";
-import { ElementInfoBase, FileInfo, ImportInfo } from "../core/elementsInfo";
+import { ElementInfoBase, FileInfo } from "../core/elementsInfo";
 
 const warns = [];
 const debuggedFiles = [];

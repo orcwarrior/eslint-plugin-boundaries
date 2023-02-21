@@ -1,14 +1,14 @@
 const { NO_UNKNOWN_FILES: RULE } = require("../../../src/constants/rules");
 const { SETTINGS, createRuleTester, pathResolvers } = require("../../support/helpers");
 
-const rule = require(`../../../src/rules/${RULE}`);
+const rule = require(`../../../src/rules/${RULE}`).default;
 
 const { absoluteFilePath, codeFilePath } = pathResolvers("one-level");
 
 const FOO_CODE = "export default {}";
 const ERROR_MESSAGE = "File is not of any known element type";
 
-const test = (settings) => {
+const _test = (settings) => {
   const ruleTester = createRuleTester(settings);
   ruleTester.run(RULE, rule, {
     valid: [
@@ -70,7 +70,7 @@ const test = (settings) => {
 };
 
 // deprecated settings
-test(SETTINGS.deprecated);
+_test(SETTINGS.deprecated);
 
 // new settings
-test(SETTINGS.oneLevel);
+_test(SETTINGS.oneLevel);

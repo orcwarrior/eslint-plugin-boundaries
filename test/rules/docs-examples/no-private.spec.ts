@@ -2,7 +2,7 @@ const { NO_PRIVATE: RULE } = require("../../../src/constants/rules");
 const { SETTINGS, createRuleTester, pathResolvers } = require("../../support/helpers");
 const { noPrivateMessage } = require("../../support/messages");
 
-const rule = require(`../../../src/rules/${RULE}`);
+const rule = require(`../../../src/rules/${RULE}`).default;
 
 const settings = SETTINGS.docsExamples;
 const { absoluteFilePath } = pathResolvers("docs-examples");

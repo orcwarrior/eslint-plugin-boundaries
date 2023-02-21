@@ -2,11 +2,11 @@ const { EXTERNAL: RULE } = require("../../../src/constants/rules");
 const { SETTINGS, createRuleTester, pathResolvers } = require("../../support/helpers");
 const { customErrorMessage, externalNoRuleMessage } = require("../../support/messages");
 
-const rule = require(`../../../src/rules/${RULE}`);
+const rule = require(`../../../src/rules/${RULE}`).default;
 
 const { absoluteFilePath } = pathResolvers("one-level");
 
-const test = (settings, options, errorMessages) => {
+const _test = (settings, options, errorMessages) => {
   const ruleTester = createRuleTester(settings);
   ruleTester.run(RULE, rule, {
     valid: [
@@ -68,7 +68,7 @@ const test = (settings, options, errorMessages) => {
 
 // disallow-based options
 
-test(
+_test(
   SETTINGS.oneLevel,
   [
     {

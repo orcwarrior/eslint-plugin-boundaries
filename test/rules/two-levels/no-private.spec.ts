@@ -2,7 +2,7 @@ const { NO_PRIVATE: RULE } = require("../../../src/constants/rules");
 const { SETTINGS, createRuleTester, pathResolvers } = require("../../support/helpers");
 const { noPrivateMessage } = require("../../support/messages");
 
-const rule = require(`../../../src/rules/${RULE}`);
+const rule = require(`../../../src/rules/${RULE}`).default;
 
 const options = [
   {
@@ -10,7 +10,7 @@ const options = [
   },
 ];
 
-const test = (settings, { absoluteFilePath }) => {
+const _test = (settings, { absoluteFilePath }) => {
   const ruleTester = createRuleTester(settings);
   ruleTester.run(RULE, rule, {
     valid: [
@@ -153,4 +153,4 @@ const test = (settings, { absoluteFilePath }) => {
   });
 };
 
-test(SETTINGS.twoLevelsWithPrivate, pathResolvers("two-levels-with-private"));
+_test(SETTINGS.twoLevelsWithPrivate, pathResolvers("two-levels-with-private"));

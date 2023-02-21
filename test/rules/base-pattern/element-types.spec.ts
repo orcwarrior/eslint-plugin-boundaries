@@ -2,7 +2,7 @@ const { ELEMENT_TYPES: RULE } = require("../../../src/constants/rules");
 const { SETTINGS, createRuleTester, pathResolvers } = require("../../support/helpers");
 const { elementTypesNoRuleMessage } = require("../../support/messages");
 
-const rule = require(`../../../src/rules/${RULE}`);
+const rule = require(`../../../src/rules/${RULE}`).default;
 
 const settings = SETTINGS.basePattern;
 

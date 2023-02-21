@@ -2,11 +2,11 @@ const { ELEMENT_TYPES: RULE } = require("../../../src/constants/rules");
 const { SETTINGS, createRuleTester, pathResolvers } = require("../../support/helpers");
 const { customErrorMessage, elementTypesNoRuleMessage } = require("../../support/messages");
 
-const rule = require(`../../../src/rules/${RULE}`);
+const rule = require(`../../../src/rules/${RULE}`).default;
 
 const { absoluteFilePath } = pathResolvers("one-level");
 
-const testCapture = (settings, options, errorMessages) => {
+const _testCapture = (settings, options, errorMessages) => {
   const ruleTester = createRuleTester(settings);
 
   ruleTester.run(RULE, rule, {
@@ -175,7 +175,7 @@ const testCapture = (settings, options, errorMessages) => {
 
 // capture options
 
-testCapture(
+_testCapture(
   {
     ...SETTINGS.oneLevel,
     ...{

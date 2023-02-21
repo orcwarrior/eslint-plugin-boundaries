@@ -4,7 +4,8 @@
   "description": "Eslint plugin checking architecture boundaries between elements",
   "scripts": {
     "build": "tsc",
-    "lint": "eslint src *.js test",
+    "lint": "eslint src/*.ts test",
+    "lint:fix": "eslint \"{src,test}/**/*.ts\" --fix",
     "lint-staged": "lint-staged",
     "test": "jest",
     "test:unit": "cross-env ESLINT_PLUGIN_BOUNDARIES_DEBUG=1 npm run test",
@@ -64,9 +65,9 @@
     "typescript": "^4.9.5"
   },
   "lint-staged": {
-    "test/**/*.js": "eslint",
-    "src/**/*.js": "eslint",
-    "*.js": "eslint"
+    "test/**/*.ts": "eslint",
+    "src/**/*.ts": "eslint",
+    "*.ts": "eslint"
   },
   "engines": {
     "node": ">=14.0.0"

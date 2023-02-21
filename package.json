@@ -2,6 +2,15 @@
   "name": "eslint-plugin-boundaries",
   "version": "3.1.0",
   "description": "Eslint plugin checking architecture boundaries between elements",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src *.js test",
+    "lint-staged": "lint-staged",
+    "test": "jest",
+    "test:unit": "cross-env ESLINT_PLUGIN_BOUNDARIES_DEBUG=1 npm run test",
+    "prepare": "is-ci || husky install",
+    "prepublishOnly": "npm run build"
+  },
   "keywords": [
     "eslint",
     "plugin",
@@ -16,19 +25,14 @@
   "license": "MIT",
   "repository": "https://github.com/javierbrea/eslint-plugin-boundaries",
   "files": [
-    "src",
+    "dist",
     "resolver-legacy-alias"
   ],
-  "main": "index.ts",
-  "type": "module",
-  "scripts": {
-    "build": "tsc",
-    "lint": "eslint src *.js test",
-    "lint-staged": "lint-staged",
-    "test": "jest",
-    "test:unit": "cross-env ESLINT_PLUGIN_BOUNDARIES_DEBUG=1 npm run test",
-    "prepare": "is-ci || husky install"
+  "publishConfig": {
+    "directory": "dist"
   },
+  "main": "dist/index.js",
+  "type": "module",
   "peerDependencies": {
     "eslint": ">=6.0.0"
   },

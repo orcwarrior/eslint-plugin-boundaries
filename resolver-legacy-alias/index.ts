@@ -1,4 +1,4 @@
-const resolve = require("resolve");
+import resolve from "resolve";
 
 const getUsedAlias = (relativeFilePath, config) => {
   return Object.keys(config).find((alias) => relativeFilePath.indexOf(alias) === 0);
@@ -15,16 +15,14 @@ const replaceAliases = (filePath, config) => {
 module.exports = {
   interfaceVersion: 2,
   resolve: function (source, _file, config) {
-    if (resolve.isCore(source)) return { found: true, path: null };
+    if (resolve.isCore(source)) {return {found: true, path: null};}
     try {
       return {
         found: true,
-        path: resolve.sync(replaceAliases(source, config), {
-          basedir: process.cwd(),
-        }),
+        path: resolve.sync(replaceAliases(source, config), {basedir: process.cwd()})
       };
     } catch (err) {
-      return { found: false };
+      return {found: false};
     }
-  },
+  }
 };

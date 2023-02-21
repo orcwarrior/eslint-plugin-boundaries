@@ -17,19 +17,19 @@ type BoundariesRuleContext = Rule.RuleContext & {
   settings: BoundariesConfigSettings;
 }
 // TODO: Finalize types
-type RuleFunctionParam = {
+type RuleFunctionParam<TRuleConfig> = {
   /** Imported/Exported dependency that's currently checked*/
   dependency: DependencyInfo;
   file: FileInfo;
   node: Rule.Node;
   context: BoundariesRuleContext;
   /** Rule options array w/o severity level (first element)*/
-  options: RuleBoundariesBaseConfig;// | [];
+  options: TRuleConfig;// | [];
 };
-type RuleFunction = (param: RuleFunctionParam) => any;
-const dependencyRule = (
+type RuleFunction<TRuleConfig> = (param: RuleFunctionParam<TRuleConfig>) => any;
+const dependencyRule = <TRuleConfig = RuleBoundariesBaseConfig>(
   ruleMeta: RuleMeta,
-  rule: RuleFunction,
+  rule: RuleFunction<TRuleConfig>,
   ruleOptions: RuleOptions = {}) => ({
 
   create: (context: BoundariesRuleContext): Rule.RuleListener => {

@@ -92,7 +92,7 @@ type BoundariesConfigSettings = {
   /** Files or dependencies not matching these micromatch patterns will be ignored by the plugin. If this option is not provided, all files will be included.*/
   [IGNORE]: string[],
   /** Files or dependencies matching these micromatch patterns will be ignored by the plugin.*/
-  [INCLUDE]: string[],
+  [INCLUDE]?: string[],
 }
 type EslintPluginConfig = {
   plugins: [EslintPluginName];

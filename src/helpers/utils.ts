@@ -8,12 +8,21 @@ function isArray(object): boolean {
   return Array.isArray(object);
 }
 
-function replaceObjectValueInTemplate(template: string, key: string, value: string, namespace?: string): string {
+function replaceObjectValueInTemplate(
+  template: string,
+  key: string,
+  value: string,
+  namespace?: string): string {
+
   const keyToReplace = namespace ? `${namespace}.${key}` : key;
   return template.replace(`\${${keyToReplace}}`, value);
 }
 
-function replaceObjectValuesInTemplates(strings: string | string[], object: CapturedValues, namespace?: string): string | string[] {
+function replaceObjectValuesInTemplates(
+  strings: string | string[],
+  object: CapturedValues,
+  namespace?: string): string | string[] {
+  
   return Object.keys(object).reduce((result, objectKey) => {
     // If template is an array, replace key by value in all patterns
     if (Array.isArray(result)) {

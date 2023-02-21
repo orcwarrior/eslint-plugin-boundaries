@@ -1,13 +1,14 @@
 import {isArray, isString, replaceObjectValuesInTemplates} from "./utils";
 import {micromatchPatternReplacingObjectsValues} from "./rules";
-import {CapturedValues} from "../core/elementsInfo";
+import {CapturedValues, ElementInfoBase, FileInfo} from "../core/elementsInfo";
+import {DependencyInfo} from "../core/dependencyInfo";
 
 
-function quote(str) {
+function quote(str: string): string {
   return `'${str}'`;
 }
 
-function typeMessage(elementMatcher) {
+function typeMessage(elementMatcher): string {
   return `elements of type ${quote(elementMatcher)}`;
 }
 
@@ -24,6 +25,7 @@ function propertiesConcater(properties: any[], index: number): string {
 function micromatchPatternMessage(
   micromatchPatterns: string | string[],
   elementCapturedValues: CapturedValues): string {
+
   const micromatchPatternsWithValues = micromatchPatternReplacingObjectsValues(
     micromatchPatterns,
     {from: elementCapturedValues}
@@ -70,7 +72,7 @@ function elementMatcherMessage(elementMatcher, elementCapturedValues) {
   )}`;
 }
 
-function ruleElementMessage(elementPatterns, elementCapturedValues) {
+function ruleElementMessage(elementPatterns: string[], elementCapturedValues): string {
   if (isArray(elementPatterns)) {
     if (elementPatterns.length === 1) {
       return elementMatcherMessage(elementPatterns[0], elementCapturedValues);
@@ -85,16 +87,21 @@ function ruleElementMessage(elementPatterns, elementCapturedValues) {
   return elementMatcherMessage(elementPatterns, elementCapturedValues);
 }
 
-function elementPropertiesToReplaceInTemplate(element) {
+type ElementInfoPartialWithCaptures =
+  Pick<ElementInfoBase, "type" | "internalPath" | "source"> & ElementInfoBase["capturedValues"]
+
+function elementPropertiesToReplaceInTemplate(element: ElementInfoBase):
+ElementInfoPartialWithCaptures {
+
   return {
     ...element.capturedValues,
     type: element.type,
-    internalPath: element.internalPath,
-    source: element.source
+    internalPath: element?.internalPath ?? null,
+    source: element?.source ?? null
   };
 }
 
-function customErrorMessage(message, file, dependency, report = {}): string {
+function customErrorMessage(message, file: FileInfo, dependency: DependencyInfo, report = {}): string {
   let replacedMessage = replaceObjectValuesInTemplates(
     replaceObjectValuesInTemplates(message, elementPropertiesToReplaceInTemplate(file), "file"),
     elementPropertiesToReplaceInTemplate(dependency),

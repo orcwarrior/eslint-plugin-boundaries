@@ -22,13 +22,11 @@ function elementsMatcherSchema(matcherOptions = DEFAULT_MATCHER_OPTIONS): JSONSc
         type: "array", // multiple matchers
         items: {
           oneOf: [
-            {type: "string" // matcher with options
-            },
+            {type: "string"},// matcher with options
             {
               type: "array",
               items: [
-                {type: "string" // matcher
-                },
+                {type: "string"}, // matcher
                 matcherOptions // options
               ]
             }

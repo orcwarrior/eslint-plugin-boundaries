@@ -132,7 +132,7 @@ function ruleMatch(
 function wrapRulesInArray(rules: ElementTypeConfig | ElementTypeConfig[]): ElementTypeConfig[] {
   if (!Array.isArray(rules)) {
     return [rules];
-  } else if (Array.isArray(rules) && typeof rules[1] == "object") {
+  } else if (Array.isArray(rules) && (!Array.isArray(rules[1])) && typeof rules[1] == "object") {
     return [rules as [ElementType, ElementCaptureMatcher]];
   } else {
     return rules as ElementTypeConfig[];
@@ -151,7 +151,9 @@ function isMatchElementKey(
     micromatchPatternReplacingObjectsValues(matcher, elementsToCompareCapturedValues)
   );
   if (isMatch && captures) {
-    return {result: isObjectMatch(captures, elementInfo.capturedValues, elementsToCompareCapturedValues)};
+    return {
+      result: isObjectMatch(captures, elementInfo.capturedValues, elementsToCompareCapturedValues)
+    };
   }
   return {result: isMatch};
 }

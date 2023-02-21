@@ -141,7 +141,7 @@ function elementTypeAndParents(path: string, settings: BoundariesConfigSettings)
         accumulator.unshift(elementPathSegment);
         let elementFound = false;
         getElements(settings).forEach((element) => {
-          const typeOfMatch = element.mode ?? VALID_MODES[0];
+          const typeOfMatch = VALID_MODES.includes(element.mode) ? element.mode : VALID_MODES[0];
           const elementPatterns = Array.isArray(element.pattern)
             ? element.pattern
             : [element.pattern];

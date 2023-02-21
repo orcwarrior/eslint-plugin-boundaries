@@ -44,7 +44,7 @@ type RulesOptionsSchemaParam = {
 const defaultRulesOptionsSchema: RulesOptionsSchemaParam = {rulesMainKey: RULE_MAIN_KEY};
 
 function rulesOptionsSchema(_options: RulesOptionsSchemaParam = {}): JSONSchema4 {
-  const options = {...defaultRulesOptionsSchema, _options};
+  const options = {...defaultRulesOptionsSchema, ..._options};
   const {rulesMainKey} = options;
   return [
     {

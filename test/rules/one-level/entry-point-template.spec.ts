@@ -2,11 +2,11 @@ const { ENTRY_POINT: RULE } = require("../../../src/constants/rules");
 const { SETTINGS, createRuleTester, pathResolvers } = require("../../support/helpers");
 const { customErrorMessage, entryPointNoRuleMessage } = require("../../support/messages");
 
-const rule = require(`../../../src/rules/${RULE}`);
+const rule = require(`../../../src/rules/${RULE}`).default;
 
 const { absoluteFilePath } = pathResolvers("one-level");
 
-const testCapture = (settings, options, errorMessages = {}) => {
+const _testCapture = (settings, options, errorMessages = {}) => {
   const ruleTester = createRuleTester(settings);
   ruleTester.run(RULE, rule, {
     valid: [
@@ -118,7 +118,7 @@ const testCapture = (settings, options, errorMessages = {}) => {
 
 // options with capture
 
-testCapture(
+_testCapture(
   SETTINGS.oneLevel,
   [
     {
@@ -150,7 +150,7 @@ testCapture(
 
 // Custom messages
 
-testCapture(
+_testCapture(
   SETTINGS.oneLevel,
   [
     {

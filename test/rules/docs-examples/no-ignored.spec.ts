@@ -1,14 +1,14 @@
 const { NO_IGNORED: RULE } = require("../../../src/constants/rules");
 const { SETTINGS, createRuleTester, pathResolvers } = require("../../support/helpers");
 
-const rule = require(`../../../src/rules/${RULE}`);
+const rule = require(`../../../src/rules/${RULE}`).default;
 
 const settings = SETTINGS.docsExamples;
 const { absoluteFilePath } = pathResolvers("docs-examples");
 
 const ERROR_MESSAGE = "Importing ignored files is not allowed";
 
-const test = (customSettings) => {
+const _test = (customSettings) => {
   const ruleTester = createRuleTester(customSettings);
 
   ruleTester.run(RULE, rule, {
@@ -47,19 +47,19 @@ const test = (customSettings) => {
 };
 
 // ignore foo
-test({
+_test({
   ...settings,
   "boundaries/ignore": ["**/foo.js"],
 });
 
 // include other file
-test({
+_test({
   ...settings,
   "boundaries/include": ["**/foo2.js", "**/sort.js"],
 });
 
 // include all other files except "foo"
-test({
+_test({
   ...settings,
   "boundaries/include": ["**/foo2.js", "**/sort.js", "**/foo.js"],
   "boundaries/ignore": ["**/foo.js"],

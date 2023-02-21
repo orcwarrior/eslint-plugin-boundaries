@@ -1,13 +1,13 @@
 const { NO_UNKNOWN: RULE } = require("../../../src/constants/rules");
 const { SETTINGS, createRuleTester, pathResolvers } = require("../../support/helpers");
 
-const rule = require(`../../../src/rules/${RULE}`);
+const rule = require(`../../../src/rules/${RULE}`).default;
 
 const { absoluteFilePath, codeFilePath } = pathResolvers("one-level");
 
 const ERROR_MESSAGE = "Importing unknown elements is not allowed";
 
-const test = (settings) => {
+const _test = (settings) => {
   const ruleTester = createRuleTester(settings);
 
   const customSettings = {
@@ -60,7 +60,7 @@ const test = (settings) => {
 };
 
 // deprecated settings
-test(SETTINGS.deprecated);
+_test(SETTINGS.deprecated);
 
 // new settings
-test(SETTINGS.oneLevel);
+_test(SETTINGS.oneLevel);

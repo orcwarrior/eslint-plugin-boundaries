@@ -2,11 +2,11 @@ const { ELEMENT_TYPES: RULE } = require("../../../src/constants/rules");
 const { SETTINGS, createRuleTester, pathResolvers } = require("../../support/helpers");
 const { customErrorMessage, elementTypesNoRuleMessage } = require("../../support/messages");
 
-const rule = require(`../../../src/rules/${RULE}`);
+const rule = require(`../../../src/rules/${RULE}`).default;
 
 const { absoluteFilePath, codeFilePath } = pathResolvers("one-level");
 
-const test = (settings, options, errorMessages) => {
+const _test = (settings, options, errorMessages) => {
   const ruleTester = createRuleTester(settings);
 
   ruleTester.run(RULE, rule, {
@@ -270,7 +270,7 @@ const test = (settings, options, errorMessages) => {
   });
 };
 
-const testCapture = (settings, options, errorMessages) => {
+const _testCapture = (settings, options, errorMessages) => {
   const ruleTester = createRuleTester(settings);
 
   ruleTester.run(RULE, rule, {
@@ -389,7 +389,7 @@ const testCapture = (settings, options, errorMessages) => {
 
 // deprecated settings
 
-test(
+_test(
   SETTINGS.deprecated,
   [
     {
@@ -410,7 +410,7 @@ test(
 );
 
 // settings with no capture option
-test(
+_test(
   {
     ...SETTINGS.oneLevel,
     "boundaries/elements": [
@@ -457,7 +457,7 @@ test(
 
 // disallow-based options
 
-test(
+_test(
   SETTINGS.oneLevel,
   [
     {
@@ -479,7 +479,7 @@ test(
 
 // micromatch-based options
 
-test(
+_test(
   SETTINGS.oneLevel,
   [
     {
@@ -500,7 +500,7 @@ test(
 );
 
 // allow-based options
-test(
+_test(
   SETTINGS.oneLevel,
   [
     {
@@ -527,7 +527,7 @@ test(
 
 // capture options
 
-testCapture(
+_testCapture(
   SETTINGS.oneLevel,
   [
     {
@@ -552,7 +552,7 @@ testCapture(
 
 // capture options with micromatch negative expression
 
-testCapture(
+_testCapture(
   SETTINGS.oneLevel,
   [
     {
@@ -577,7 +577,7 @@ testCapture(
 
 // capture options with micromatch
 
-testCapture(
+_testCapture(
   SETTINGS.oneLevel,
   [
     {
@@ -602,7 +602,7 @@ testCapture(
 
 // Custom error message
 
-testCapture(
+_testCapture(
   SETTINGS.oneLevel,
   [
     {
@@ -634,7 +634,7 @@ testCapture(
 
 // Custom error message default
 
-testCapture(
+_testCapture(
   SETTINGS.oneLevel,
   [
     {
@@ -662,7 +662,7 @@ testCapture(
   }
 );
 
-testCapture(
+_testCapture(
   SETTINGS.oneLevel,
   [
     {
@@ -685,7 +685,7 @@ testCapture(
   }
 );
 
-testCapture(
+_testCapture(
   SETTINGS.oneLevel,
   [
     {

@@ -2,11 +2,11 @@ const { EXTERNAL: RULE } = require("../../../src/constants/rules");
 const { SETTINGS, createRuleTester, pathResolvers } = require("../../support/helpers");
 const { customErrorMessage, externalNoRuleMessage } = require("../../support/messages");
 
-const rule = require(`../../../src/rules/${RULE}`);
+const rule = require(`../../../src/rules/${RULE}`).default;
 
 const { absoluteFilePath, codeFilePath } = pathResolvers("one-level");
 
-const test = (settings, options, errorMessages) => {
+const _test = (settings, options, errorMessages) => {
   const ruleTester = createRuleTester(settings);
   ruleTester.run(RULE, rule, {
     valid: [
@@ -276,7 +276,7 @@ const test = (settings, options, errorMessages) => {
   });
 };
 
-const testCapture = (settings, options, errorMessages) => {
+const _testCapture = (settings, options, errorMessages) => {
   const ruleTester = createRuleTester(settings);
   ruleTester.run(RULE, rule, {
     valid: [
@@ -363,7 +363,7 @@ const testCapture = (settings, options, errorMessages) => {
 };
 
 // deprecated settings
-test(
+_test(
   SETTINGS.deprecated,
   [
     {
@@ -398,7 +398,7 @@ test(
 
 // allow-based options
 
-test(
+_test(
   SETTINGS.oneLevel,
   [
     {
@@ -437,7 +437,7 @@ test(
 
 // micromatch-based options
 
-test(
+_test(
   SETTINGS.oneLevel,
   [
     {
@@ -476,7 +476,7 @@ test(
 
 // disallow-based options
 
-test(
+_test(
   SETTINGS.oneLevel,
   [
     {
@@ -514,7 +514,7 @@ test(
 
 // custom error messages
 
-test(
+_test(
   SETTINGS.oneLevel,
   [
     {
@@ -558,7 +558,7 @@ test(
 
 // options with capture allow-based
 
-testCapture(
+_testCapture(
   SETTINGS.oneLevel,
   [
     {

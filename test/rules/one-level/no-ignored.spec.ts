@@ -1,7 +1,7 @@
 const { NO_IGNORED: RULE } = require("../../../src/constants/rules");
 const { SETTINGS, createRuleTester, pathResolvers } = require("../../support/helpers");
 
-const rule = require(`../../../src/rules/${RULE}`);
+const rule = require(`../../../src/rules/${RULE}`).default;
 
 const { absoluteFilePath, codeFilePath } = pathResolvers("one-level");
 
@@ -12,7 +12,7 @@ const customSettings = {
   "boundaries/ignore": [codeFilePath("components/component-b/**/*.js")],
 };
 
-const test = (settings) => {
+const _test = (settings) => {
   const ruleTester = createRuleTester(settings);
   ruleTester.run(RULE, rule, {
     valid: [
@@ -72,7 +72,7 @@ const test = (settings) => {
 };
 
 // deprecated settings
-test(SETTINGS.deprecated);
+_test(SETTINGS.deprecated);
 
 // new settings
-test(SETTINGS.oneLevel);
+_test(SETTINGS.oneLevel);

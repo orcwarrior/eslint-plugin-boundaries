@@ -2,9 +2,9 @@ const { ENTRY_POINT: RULE } = require("../../../src/constants/rules");
 const { SETTINGS, createRuleTester, pathResolvers } = require("../../support/helpers");
 const { customErrorMessage, entryPointNoRuleMessage } = require("../../support/messages");
 
-const rule = require(`../../../src/rules/${RULE}`);
+const rule = require(`../../../src/rules/${RULE}`).default;
 
-const test = (settings, options, { absoluteFilePath }, errorMessages = {}) => {
+const _test = (settings, options, { absoluteFilePath }, errorMessages = {}) => {
   const ruleTester = createRuleTester(settings);
 
   ruleTester.run(RULE, rule, {
@@ -234,7 +234,7 @@ const test = (settings, options, { absoluteFilePath }, errorMessages = {}) => {
   });
 };
 
-test(
+_test(
   SETTINGS.twoLevels,
   [
     {
@@ -283,7 +283,7 @@ test(
   }
 );
 
-test(
+_test(
   SETTINGS.twoLevelsWithPrivate,
   [
     {

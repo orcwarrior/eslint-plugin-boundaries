@@ -198,7 +198,7 @@ const pathResolvers = (basePath) => {
   };
 };
 
-module.exports = {
+export {
   SETTINGS,
   createRuleTester,
   pathResolvers,

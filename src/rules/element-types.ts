@@ -7,7 +7,7 @@ import {
   isMatchElementType
 } from "../helpers/rules";
 import {customErrorMessage, elementMessage, ruleElementMessage} from "../helpers/messages";
-import { RuleErrorReporterFunction, RuleMatchingFunction } from "./types";
+import {RuleErrorReporterFunction, RuleMatchingFunction} from "./types";
 
 
 const elementRulesAllowDependencyType: RuleMatchingFunction = (element, dependency, options) => {
@@ -30,13 +30,13 @@ const errorMessage: RuleErrorReporterFunction = (ruleData, file, dependency) => 
     )}. Dependency is ${elementMessage(dependency)}`;
   }
   return `Importing ${ruleElementMessage(
-    ruleReport.disallow,
+    ruleReport.disallow as string[],
     file.capturedValues
   )} is not allowed in ${ruleElementMessage(
-    ruleReport.element,
+    ruleReport.element as string[],
     file.capturedValues
   )}. Disallowed in rule ${ruleReport.index + 1}`;
-}
+};
 
 export default dependencyRule(
   {

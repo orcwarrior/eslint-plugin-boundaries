@@ -18,6 +18,7 @@ type Rules = {
 /** Full name to be used in plugin config, for example: "boundaries/entry-point" */
 type FullRuleName<Rule extends RuleName = RuleName> = `${EslintPluginName}/${Rule}`;
 
+export {rules};
 export const ELEMENT_TYPES = rules.ELEMENT_TYPES;
 export const ENTRY_POINT = rules.ENTRY_POINT;
 export const EXTERNAL = rules.EXTERNAL;

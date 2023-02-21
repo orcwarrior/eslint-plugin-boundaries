@@ -1,11 +1,7 @@
 import {RULE_ENTRY_POINT} from "../constants/settings";
 import {dependencyRule} from "../rules-factories/dependency-rule";
 import {rulesOptionsSchema} from "../helpers/validations";
-import {
-  dependencyLocation,
-  elementRulesAllowDependency,
-  isMatchElementKey
-} from "../helpers/rules";
+import { dependencyLocation, elementRulesAllowDependency, isMatchElementKey } from "../helpers/rules";
 import {customErrorMessage, elementMessage, ruleElementMessage} from "../helpers/messages";
 import {RuleErrorReporterFunction, RuleMatchingFunction} from "./types";
 
@@ -32,7 +28,7 @@ const errorMessage: RuleErrorReporterFunction = (ruleData, file, dependency) => 
     }' in dependencies ${elementMessage(dependency)}`;
   }
   return `The entry point '${dependency.internalPath}' is not allowed in ${ruleElementMessage(
-    ruleReport.element,
+    ruleReport.element as string[],
     dependency.capturedValues
   )}. Disallowed in rule ${ruleReport.index + 1}`;
 };

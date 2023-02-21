@@ -1,36 +1,24 @@
-const { PLUGIN_NAME } = require("../constants/plugin");
+import {EslintPluginConfig} from "./EslintPluginConfig";
 
-const {
-  ELEMENTS,
-  IGNORE,
-  // rules
-  RULE_ELEMENT_TYPES,
-  RULE_ENTRY_POINT,
-  RULE_EXTERNAL,
-  RULE_NO_IGNORED,
-  RULE_NO_PRIVATE,
-  RULE_NO_UNKNOWN_FILES,
-  RULE_NO_UNKNOWN,
-} = require("../constants/settings");
 
-module.exports = {
-  plugins: [PLUGIN_NAME],
+const recommended: EslintPluginConfig = {
+  plugins: ["boundaries"],
   rules: {
-    [RULE_ELEMENT_TYPES]: [2],
-    [RULE_ENTRY_POINT]: [2],
-    [RULE_EXTERNAL]: [2],
-    [RULE_NO_IGNORED]: 0,
-    [RULE_NO_PRIVATE]: [
+    "boundaries/element-types": [2],
+    "boundaries/entry-point": [2],
+    "boundaries/external": [2],
+    "boundaries/no-ignored": 0,
+    "boundaries/no-private": [
       2,
-      {
-        allowUncles: true,
-      },
+      {allowUncles: true}
     ],
-    [RULE_NO_UNKNOWN_FILES]: 0,
-    [RULE_NO_UNKNOWN]: 0,
+    "boundaries/no-unknown-files": 0,
+    "boundaries/no-unknown": 0
   },
   settings: {
-    [ELEMENTS]: [],
-    [IGNORE]: ["**/*.spec?.js", "**/*.test?.js"],
-  },
+    "boundaries/elements": [],
+    "boundaries/ignore": ["**/*.spec?.js", "**/*.test?.js"]
+  }
 };
+
+export {recommended};

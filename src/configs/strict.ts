@@ -1,17 +1,13 @@
-const {
-  RULE_NO_IGNORED,
-  RULE_NO_UNKNOWN_FILES,
-  RULE_NO_UNKNOWN,
-} = require("../constants/settings");
+import {recommended} from "./recommended";
 
-const recommended = require("./recommended");
-
-module.exports = {
+const strict = {
   ...recommended,
   rules: {
     ...recommended.rules,
-    [RULE_NO_IGNORED]: 2,
-    [RULE_NO_UNKNOWN_FILES]: 2,
-    [RULE_NO_UNKNOWN]: 2,
-  },
+    "boundaries/no-ignored": 2,
+    "boundaries/no-unknown-files": 2,
+    "boundaries/no-unknown": 2
+  }
 };
+
+export {strict};

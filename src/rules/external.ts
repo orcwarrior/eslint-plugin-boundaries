@@ -1,22 +1,20 @@
 import micromatch from "micromatch";
-import {ImportSpecifier} from "estree";
+import { ImportSpecifier } from "estree";
 import {
   dependencyLocation,
   elementRulesAllowDependency,
   IsMatchFn,
-  micromatchPatternReplacingObjectsValues
+  micromatchPatternReplacingObjectsValues,
 } from "../helpers/rules";
-import {DependencyInfo} from "../core/dependencyInfo";
-import {rulesOptionsSchema} from "../helpers/validations";
-import {customErrorMessage, elementMessage, ruleElementMessage} from "../helpers/messages";
-import {dependencyRule} from "../rules-factories/dependency-rule";
-import {RULE_EXTERNAL} from "../constants/settings";
-import {ElementInfo} from "../core/elementsInfo";
-import {RuleBoundariesBaseConfig} from "../configs/EslintPluginConfig";
-
+import { DependencyInfo } from "../core/dependencyInfo";
+import { rulesOptionsSchema } from "../helpers/validations";
+import { customErrorMessage, elementMessage, ruleElementMessage } from "../helpers/messages";
+import { dependencyRule } from "../rules-factories/dependency-rule";
+import { RULE_EXTERNAL } from "../constants/settings";
+import { ElementInfo } from "../core/elementsInfo";
+import { RuleBoundariesBaseConfig } from "../configs/EslintPluginConfig";
 
 function specifiersMatch(specifiers: ImportSpecifier[], options, elementsCapturedValues) {
-
   const importedSpecifiersNames = specifiers
     .filter((specifier) => {
       return specifier.type === "ImportSpecifier" && specifier.imported.name;
@@ -35,14 +33,19 @@ function specifiersMatch(specifiers: ImportSpecifier[], options, elementsCapture
   }, []);
 }
 
-type DependencyWithSpecifiers = DependencyInfo & { specifiers: ImportSpecifier[] }
+type DependencyWithSpecifiers = DependencyInfo & {
+  specifiers: ImportSpecifier[];
+};
 const isMatchExternalDependency: IsMatchFn = (
   dependency: DependencyWithSpecifiers,
-  matcher, options, elementsCapturedValues) => {
-
+  matcher,
+  options,
+  elementsCapturedValues
+) => {
   const matcherWithTemplatesReplaced = micromatchPatternReplacingObjectsValues(
     matcher,
-    elementsCapturedValues);
+    elementsCapturedValues
+  );
   const isMatch = micromatch.isMatch(dependency.baseModule, matcherWithTemplatesReplaced);
 
   if (isMatch && options && Object.keys(options).length) {
@@ -53,30 +56,31 @@ const isMatchExternalDependency: IsMatchFn = (
     );
     return {
       result: specifiersResult.length > 0,
-      report: specifiersResult
+      report: specifiersResult,
     };
   }
-  return {result: isMatch};
+  return { result: isMatch };
 };
 
-function elementRulesAllowExternalDependency(element: ElementInfo,
+function elementRulesAllowExternalDependency(
+  element: ElementInfo,
   dependency: DependencyWithSpecifiers,
-  options: RuleBoundariesBaseConfig) {
+  options: RuleBoundariesBaseConfig
+) {
   return elementRulesAllowDependency({
     element,
     dependency,
     options,
-    isMatch: isMatchExternalDependency
+    isMatch: isMatchExternalDependency,
   });
 }
-
 
 function errorMessage(ruleData, file, dependency) {
   const ruleReport = ruleData.ruleReport;
   if (ruleReport.message) {
-    return customErrorMessage(ruleReport.message,
-      file, dependency,
-      {specifiers: ruleData.report && ruleData.report.join(", ")});
+    return customErrorMessage(ruleReport.message, file, dependency, {
+      specifiers: ruleData.report && ruleData.report.join(", "),
+    });
   }
   if (ruleReport.isDefault) {
     return `No rule allows the usage of external module '${
@@ -100,36 +104,36 @@ function errorMessage(ruleData, file, dependency) {
 export default dependencyRule(
   {
     ruleName: RULE_EXTERNAL,
-    description: `Check allowed external dependencies by element type`,
+    description: "Check allowed external dependencies by element type",
     schema: rulesOptionsSchema({
       targetMatcherOptions: {
         type: "object",
         properties: {
           specifiers: {
             type: "array",
-            items: {type: "string"}
-          }
+            items: { type: "string" },
+          },
         },
-        additionalProperties: false
-      }
-    })
+        additionalProperties: false,
+      },
+    }),
   },
-  function({dependency, file, node, context, options}) {
+  function ({ dependency, file, node, context, options }) {
     if (dependency.isExternal) {
       const ruleData = elementRulesAllowExternalDependency(
         file,
         // TODO: Improve typing in dependencyRule
-        {...dependency, specifiers: (node as any).source.parent.specifiers},
+        { ...dependency, specifiers: (node as any).source.parent.specifiers },
         options
       );
       if (!ruleData.result) {
         context.report({
           message: errorMessage(ruleData, file, dependency),
           node: node,
-          ...dependencyLocation(node, context)
+          ...dependencyLocation(node, context),
         });
       }
     }
   },
-  {validateRules: {onlyMainKey: true}}
+  { validateRules: { onlyMainKey: true } }
 );

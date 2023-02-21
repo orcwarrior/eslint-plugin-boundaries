@@ -1,15 +1,15 @@
-import {FullRuleName, RULE_MAIN_KEY, RuleName} from "../constants/rules";
-import {Rule} from "eslint";
+import { FullRuleName, RULE_MAIN_KEY, RuleName } from "../constants/rules";
+import { Rule } from "eslint";
 import micromatch from "micromatch";
-import {replaceObjectValuesInTemplates} from "./utils";
-import {CapturedValues, ElementInfo} from "../core/elementsInfo";
-import {DependencyInfo} from "../core/dependencyInfo";
+import { replaceObjectValuesInTemplates } from "./utils";
+import { CapturedValues, ElementInfo } from "../core/elementsInfo";
+import { DependencyInfo } from "../core/dependencyInfo";
 import {
   ElementCaptureMatcher,
   ElementType,
   ElementTypeConfig,
   RuleBoundariesBaseConfig,
-  RuleBoundariesRule
+  RuleBoundariesRule,
 } from "../configs/EslintPluginConfig";
 
 const REPO_URL = "https://github.com/javierbrea/eslint-plugin-boundaries";
@@ -27,18 +27,18 @@ type RuleMeta = {
   ruleName: FullRuleName;
   description: string;
   schema: any;
-}
+};
 
-function meta({description, schema = [], ruleName}: RuleMeta): Rule.RuleMetaData {
+function meta({ description, schema = [], ruleName }: RuleMeta): Rule.RuleMetaData {
   return {
     type: "problem",
     docs: {
       url: docsUrl(ruleName),
       description,
-      category: "dependencies"
+      category: "dependencies",
     },
     fixable: null,
-    schema
+    schema,
   };
 }
 
@@ -49,19 +49,20 @@ function dependencyLocation(node, context) {
     loc: {
       start: {
         line: node.loc.start.line,
-        column: columnStart
+        column: columnStart,
       },
       end: {
         line: node.loc.end.line,
-        column: columnEnd
-      }
-    }
+        column: columnEnd,
+      },
+    },
   };
 }
 
 function micromatchPatternReplacingObjectsValues(
   pattern: MicromatchPattern,
-  object: Partial<ElementsToCompareCapturedValues>) {
+  object: Partial<ElementsToCompareCapturedValues>
+) {
   let patternToReplace = pattern;
   // Backward compatibility
   if (object.from) {
@@ -75,11 +76,11 @@ function micromatchPatternReplacingObjectsValues(
   }, patternToReplace);
 }
 
-
 function isObjectMatch(
   captures: ElementCaptureMatcher,
   object: CapturedValues,
-  objectsWithValuesToReplace: ElementsToCompareCapturedValues): boolean {
+  objectsWithValuesToReplace: ElementsToCompareCapturedValues
+): boolean {
   return Object.keys(captures).reduce((isMatch, key) => {
     if (isMatch) {
       const micromatchPattern = micromatchPatternReplacingObjectsValues(
@@ -97,8 +98,12 @@ type RuleMatchResult = {
   /** TODO: couldnt find any case of that value*/
   report?: any | null;
 };
-type ElementsToCompareCapturedValues = { from: CapturedValues, target: CapturedValues };
-type IsMatchFn = (targetElement: ElementInfo,
+type ElementsToCompareCapturedValues = {
+  from: CapturedValues;
+  target: CapturedValues;
+};
+type IsMatchFn = (
+  targetElement: ElementInfo,
   element: ElementType,
   captureValues: ElementCaptureMatcher,
   elementsToCmpCapturedVals: ElementsToCompareCapturedValues
@@ -108,10 +113,11 @@ function ruleMatch(
   ruleMatchers: ElementTypeConfig | ElementTypeConfig[],
   targetElement: ElementInfo,
   isMatch: IsMatchFn,
-  fromElement: ElementInfo): RuleMatchResult {
+  fromElement: ElementInfo
+): RuleMatchResult {
   let match: RuleMatchResult = {
     result: false,
-    report: null
+    report: null,
   };
 
   const matchers = wrapRulesInArray(ruleMatchers);
@@ -120,7 +126,7 @@ function ruleMatch(
       const [value, captures = {}] = Array.isArray(matcher) ? matcher : [matcher];
       match = isMatch(targetElement, value, captures, {
         from: fromElement.capturedValues,
-        target: targetElement.capturedValues
+        target: targetElement.capturedValues,
       });
     }
   });
@@ -132,7 +138,7 @@ function ruleMatch(
 function wrapRulesInArray(rules: ElementTypeConfig | ElementTypeConfig[]): ElementTypeConfig[] {
   if (!Array.isArray(rules)) {
     return [rules];
-  } else if (Array.isArray(rules) && (!Array.isArray(rules[1])) && typeof rules[1] == "object") {
+  } else if (Array.isArray(rules) && !Array.isArray(rules[1]) && typeof rules[1] == "object") {
     return [rules as [ElementType, ElementCaptureMatcher]];
   } else {
     return rules as ElementTypeConfig[];
@@ -152,30 +158,33 @@ function isMatchElementKey(
   );
   if (isMatch && captures) {
     return {
-      result: isObjectMatch(captures, elementInfo.capturedValues, elementsToCompareCapturedValues)
+      result: isObjectMatch(captures, elementInfo.capturedValues, elementsToCompareCapturedValues),
     };
   }
-  return {result: isMatch};
+  return { result: isMatch };
 }
 
-
-function isMatchElementType(elementInfo: ElementInfo,
+function isMatchElementType(
+  elementInfo: ElementInfo,
   matcher: MicromatchPattern,
   // TODO: this should be captures: ElementCaptureMatcher instead???
   captures: ElementCaptureMatcher,
-  elementsToCompareCapturedValues: ElementsToCompareCapturedValues) {
+  elementsToCompareCapturedValues: ElementsToCompareCapturedValues
+) {
   return isMatchElementKey(elementInfo, matcher, captures, "type", elementsToCompareCapturedValues);
 }
 
 /** Picks rules that're according to specific ElementType*/
-function getElementRules(elementInfo: ElementInfo,
+function getElementRules(
+  elementInfo: ElementInfo,
   options: RuleBoundariesBaseConfig,
-  mainKey = RULE_MAIN_KEY): Array<RuleBoundariesRule & { index: number }> {
+  mainKey = RULE_MAIN_KEY
+): Array<RuleBoundariesRule & { index: number }> {
   if (!options.rules) {
     return [];
   }
   return options.rules
-    .map((rule, index) => ({...rule, index}))
+    .map((rule, index) => ({ ...rule, index }))
     .filter((rule) => {
       return ruleMatch(rule[mainKey], elementInfo, isMatchElementType, elementInfo).result;
     });
@@ -207,56 +216,66 @@ type ElementRulesAllowDependencyParam = {
 };
 type ElementRulesAllowDependencyResult = {
   /** was compliant with rules set?*/
-  result: boolean,
+  result: boolean;
   /** rule report ???*/
-  report?: any,
+  report?: any;
   ruleReport?: {
-    message: string,
-    isDefault?: boolean,
+    message: string;
+    isDefault?: boolean;
     // TODO: Ensure 2 types below are correct
-    element?: ElementTypeConfig[],
-    disallow?: ElementTypeConfig[],
-    index?: number,
-  }
-}
+    element?: ElementTypeConfig[];
+    disallow?: ElementTypeConfig[];
+    index?: number;
+  };
+};
 
 function elementRulesAllowDependency({
   element,
   dependency,
   options,
   isMatch,
-  rulesMainKey = RULE_MAIN_KEY
+  rulesMainKey = RULE_MAIN_KEY,
 }: ElementRulesAllowDependencyParam): ElementRulesAllowDependencyResult {
   const [result, report, ruleReport] = getElementRules(
     elementToGetRulesFrom(element, dependency, rulesMainKey),
     options,
     rulesMainKey
-  ).reduce((allowed, rule) => {
-    if (rule.disallow) {
-      const match = ruleMatch(rule.disallow, dependency, isMatch, element);
-      if (match.result) {
-        return [false, match.report, {
-          element: rule[rulesMainKey],
-          disallow: rule.disallow,
-          index: rule.index,
-          message: rule.message || options.message
-        }];
+  ).reduce(
+    (allowed, rule) => {
+      if (rule.disallow) {
+        const match = ruleMatch(rule.disallow, dependency, isMatch, element);
+        if (match.result) {
+          return [
+            false,
+            match.report,
+            {
+              element: rule[rulesMainKey],
+              disallow: rule.disallow,
+              index: rule.index,
+              message: rule.message || options.message,
+            },
+          ];
+        }
       }
-    }
-    if (rule.allow) {
-      const match = ruleMatch(rule.allow, dependency, isMatch, element);
-      if (match.result) {
-        return [true, match.report];
+      if (rule.allow) {
+        const match = ruleMatch(rule.allow, dependency, isMatch, element);
+        if (match.result) {
+          return [true, match.report];
+        }
       }
-    }
-    return allowed;
+      return allowed;
+    },
+    [
+      options.default === "allow",
+      null,
+      {
+        isDefault: true,
+        message: options.message,
+      },
+    ]
+  );
 
-  }, [options.default === "allow", null, {
-    isDefault: true,
-    message: options.message
-  }]);
-
-  return {result, report, ruleReport};
+  return { result, report, ruleReport };
 }
 
 export {
@@ -267,12 +286,12 @@ export {
   isMatchElementType,
   elementRulesAllowDependency,
   getElementRules,
-  micromatchPatternReplacingObjectsValues
+  micromatchPatternReplacingObjectsValues,
 };
 export type {
   MicromatchPattern,
   IsMatchFn,
   RuleMeta,
   ElementsToCompareCapturedValues,
-  ElementRulesAllowDependencyResult
+  ElementRulesAllowDependencyResult,
 };

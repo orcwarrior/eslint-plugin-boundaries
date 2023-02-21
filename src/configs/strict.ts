@@ -1,4 +1,4 @@
-import {recommended} from "./recommended";
+import { recommended } from "./recommended";
 
 const strict = {
   ...recommended,
@@ -6,8 +6,8 @@ const strict = {
     ...recommended.rules,
     "boundaries/no-ignored": 2,
     "boundaries/no-unknown-files": 2,
-    "boundaries/no-unknown": 2
-  }
+    "boundaries/no-unknown": 2,
+  },
 };
 
-export {strict};
+export { strict };

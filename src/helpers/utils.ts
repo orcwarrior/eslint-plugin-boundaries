@@ -1,4 +1,4 @@
-import {CapturedValues} from "../core/elementsInfo";
+import { CapturedValues } from "../core/elementsInfo";
 
 function isString(object): boolean {
   return typeof object === "string";
@@ -12,8 +12,8 @@ function replaceObjectValueInTemplate(
   template: string,
   key: string,
   value: string,
-  namespace?: string): string {
-
+  namespace?: string
+): string {
   const keyToReplace = namespace ? `${namespace}.${key}` : key;
   return template.replace(`\${${keyToReplace}}`, value);
 }
@@ -21,8 +21,8 @@ function replaceObjectValueInTemplate(
 function replaceObjectValuesInTemplates(
   strings: string | string[],
   object: CapturedValues,
-  namespace?: string): string | string[] {
-  
+  namespace?: string
+): string | string[] {
   return Object.keys(object).reduce((result, objectKey) => {
     // If template is an array, replace key by value in all patterns
     if (Array.isArray(result)) {
@@ -35,8 +35,4 @@ function replaceObjectValuesInTemplates(
   }, strings);
 }
 
-export {
-  isString,
-  isArray,
-  replaceObjectValuesInTemplates
-};
+export { isString, isArray, replaceObjectValuesInTemplates };

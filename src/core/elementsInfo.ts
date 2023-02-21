@@ -1,16 +1,16 @@
-import type {BoundariesRuleContext} from "../rules-factories/dependency-rule";
+import type { BoundariesRuleContext } from "../rules-factories/dependency-rule";
 import isCoreModule from "is-core-module";
 import micromatch from "micromatch";
 import resolve from "eslint-module-utils/resolve";
-import {IGNORE, INCLUDE, VALID_MODES} from "../constants/settings";
-import {getElements} from "../helpers/settings";
-import {debugFileInfo} from "../helpers/debug";
-import {elementsCache, filesCache, importsCache} from "./cache";
+import { IGNORE, INCLUDE, VALID_MODES } from "../constants/settings";
+import { getElements } from "../helpers/settings";
+import { debugFileInfo } from "../helpers/debug";
+import { elementsCache, filesCache, importsCache } from "./cache";
 import {
-  BoundariesConfigSettings, BoundariesElement,
-  ElementType
+  BoundariesConfigSettings,
+  BoundariesElement,
+  ElementType,
 } from "../configs/EslintPluginConfig";
-
 
 function baseModule(name: string, path?: string): string | null {
   if (path) {
@@ -65,7 +65,9 @@ function isExternal(name, path) {
 }
 
 /** Maps captured subpaths to object with keys based on "boundaries/elements".capture */
-function elementCaptureValues(capture: string[], captureSettings: BoundariesElement["capture"]
+function elementCaptureValues(
+  capture: string[],
+  captureSettings: BoundariesElement["capture"]
 ): Record<string, string> {
   if (!captureSettings) {
     return null;
@@ -113,11 +115,10 @@ type ElementInfoBase = {
 
   /** source ??? */
   source?: string;
-}
+};
 type ElementInfo = ElementInfoBase & {
-  parents: ElementInfoBase[]
-}
-
+  parents: ElementInfoBase[];
+};
 
 function elementTypeAndParents(path: string, settings: BoundariesConfigSettings): ElementInfo {
   const parents: ElementInfoBase[] = [];
@@ -127,7 +128,7 @@ function elementTypeAndParents(path: string, settings: BoundariesConfigSettings)
     capture: null,
     capturedValues: null,
     internalPath: null,
-    parents
+    parents,
   };
 
   if (isIgnored(path, settings)) {
@@ -138,22 +139,22 @@ function elementTypeAndParents(path: string, settings: BoundariesConfigSettings)
     .split("/")
     .reverse()
     .reduce(
-      ({accumulator, lastSegmentMatching}, elementPathSegment, segmentIndex, elementPaths) => {
+      ({ accumulator, lastSegmentMatching }, elementPathSegment, segmentIndex, elementPaths) => {
         accumulator.unshift(elementPathSegment);
         let elementFound = false;
         getElements(settings).forEach((element) => {
           const typeOfMatch = VALID_MODES.includes(element.mode) ? element.mode : VALID_MODES[0];
-          const elementPatterns = Array.isArray(element.pattern)
-            ? element.pattern
-            : [element.pattern];
+          const elementPatterns = Array.isArray(element.pattern) ? element.pattern : [element.pattern];
 
           elementPatterns.forEach((elementPattern) => {
             if (!elementFound) {
               const useFullPathMatch = typeOfMatch === VALID_MODES[2] && !elementResult.type;
-              const pattern = typeOfMatch === VALID_MODES[0] && !elementResult.type
-                ? `${elementPattern}/**/*`
-                : elementPattern;
-              let basePatternCapture = true, basePatternCaptureMatch;
+              const pattern =
+                typeOfMatch === VALID_MODES[0] && !elementResult.type
+                  ? `${elementPattern}/**/*`
+                  : elementPattern;
+              let basePatternCapture = true,
+                basePatternCaptureMatch;
 
               if (element.basePattern) {
                 basePatternCaptureMatch = micromatch.capture(
@@ -177,7 +178,7 @@ function elementTypeAndParents(path: string, settings: BoundariesConfigSettings)
                 if (element.basePattern) {
                   capturedValues = {
                     ...elementCaptureValues(basePatternCaptureMatch, element.baseCapture),
-                    ...capturedValues
+                    ...capturedValues,
                   };
                 }
                 const elementPath = useFullPathMatch
@@ -199,19 +200,19 @@ function elementTypeAndParents(path: string, settings: BoundariesConfigSettings)
                     elementPath: elementPath,
                     capture: capture,
                     capturedValues: capturedValues,
-                    internalPath: null
+                    internalPath: null,
                   });
                 }
               }
             }
           });
         });
-        return {accumulator, lastSegmentMatching};
+        return { accumulator, lastSegmentMatching };
       },
-      {accumulator: [], lastSegmentMatching: 0}
+      { accumulator: [], lastSegmentMatching: 0 }
     );
 
-  return {...elementResult, parents};
+  return { ...elementResult, parents };
 }
 
 function replacePathSlashes(absolutePath: string): string {
@@ -269,7 +270,7 @@ function importInfo(source: string, context: BoundariesRuleContext): ImportInfo 
       baseModule: baseModule(source, pathToUse),
       // TODO: Consider suggestion to simplify the code (2nd argument could be dropped then)
       // baseModule: isExternalModule ? baseModule(source) : null,
-      ...elementResult
+      ...elementResult,
     };
 
     importsCache.save(path, result, context.settings);
@@ -300,7 +301,7 @@ function fileInfo(context: BoundariesRuleContext): FileInfo {
     result = {
       path,
       isIgnored: isIgnored(path, context.settings),
-      ...elementResult
+      ...elementResult,
     };
     filesCache.save(path, result, context.settings);
     debugFileInfo(result);
@@ -308,8 +309,5 @@ function fileInfo(context: BoundariesRuleContext): FileInfo {
   return result;
 }
 
-export type {CapturedValues, ElementInfoBase, ElementInfo, FileInfo, ImportInfo};
-export {
-  importInfo,
-  fileInfo
-};
+export type { CapturedValues, ElementInfoBase, ElementInfo, FileInfo, ImportInfo };
+export { importInfo, fileInfo };

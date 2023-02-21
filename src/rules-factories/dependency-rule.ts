@@ -1,9 +1,9 @@
-import {Rule} from "eslint";
-import {validateRules, validateSettings} from "../helpers/validations";
-import {meta, RuleMeta} from "../helpers/rules";
-import {BoundariesConfigSettings, RuleBoundariesBaseConfig} from "../configs/EslintPluginConfig";
-import {FileInfo, fileInfo} from "../core/elementsInfo";
-import {DependencyInfo, dependencyInfo} from "../core/dependencyInfo";
+import { Rule } from "eslint";
+import { validateRules, validateSettings } from "../helpers/validations";
+import { meta, RuleMeta } from "../helpers/rules";
+import { BoundariesConfigSettings, RuleBoundariesBaseConfig } from "../configs/EslintPluginConfig";
+import { FileInfo, fileInfo } from "../core/elementsInfo";
+import { DependencyInfo, dependencyInfo } from "../core/dependencyInfo";
 
 // TODO: Further action on this, causes types mismatch (ts-lint vs. eslint)
 // const createRule: Rule.RuleModule = ESLintUtils.RuleCreator(
@@ -11,11 +11,11 @@ import {DependencyInfo, dependencyInfo} from "../core/dependencyInfo";
 // );
 type RuleOptions = {
   validate?: boolean;
-  validateRules?: { mainKey?: string, onlyMainKey?: boolean };
-}
+  validateRules?: { mainKey?: string; onlyMainKey?: boolean };
+};
 type BoundariesRuleContext = Rule.RuleContext & {
   settings: BoundariesConfigSettings;
-}
+};
 // TODO: Finalize types
 type RuleFunctionParam<TRuleConfig> = {
   /** Imported/Exported dependency that's currently checked*/
@@ -24,14 +24,14 @@ type RuleFunctionParam<TRuleConfig> = {
   node: Rule.Node;
   context: BoundariesRuleContext;
   /** Rule options array w/o severity level (first element)*/
-  options: TRuleConfig;// | [];
+  options: TRuleConfig; // | [];
 };
 type RuleFunction<TRuleConfig> = (param: RuleFunctionParam<TRuleConfig>) => any;
 const dependencyRule = <TRuleConfig = RuleBoundariesBaseConfig>(
   ruleMeta: RuleMeta,
   rule: RuleFunction<TRuleConfig>,
-  ruleOptions: RuleOptions = {}) => ({
-
+  ruleOptions: RuleOptions = {}
+) => ({
   create: (context: BoundariesRuleContext): Rule.RuleListener => {
     const options = context.options[0];
     validateSettings(context.settings);
@@ -47,13 +47,13 @@ const dependencyRule = <TRuleConfig = RuleBoundariesBaseConfig>(
       ImportDeclaration: (node) => {
         const dependency = dependencyInfo(node.source.value, context);
 
-        rule({file, dependency, options, node, context});
-      }
+        rule({ file, dependency, options, node, context });
+      },
     };
   },
   meta: meta(ruleMeta),
   name: ruleMeta.ruleName,
-  defaultOptions: undefined
+  defaultOptions: undefined,
 });
-export {dependencyRule};
-export type {RuleOptions, BoundariesRuleContext};
+export { dependencyRule };
+export type { RuleOptions, BoundariesRuleContext };

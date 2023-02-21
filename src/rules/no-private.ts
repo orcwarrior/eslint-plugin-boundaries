@@ -1,9 +1,7 @@
-import {dependencyRule} from "../rules-factories/dependency-rule";
-import {RULE_NO_PRIVATE} from "../constants/settings";
-import {dependencyLocation} from "../helpers/rules";
-import {customErrorMessage, elementMessage} from "../helpers/messages";
-
-
+import { dependencyRule } from "../rules-factories/dependency-rule";
+import { RULE_NO_PRIVATE } from "../constants/settings";
+import { dependencyLocation } from "../helpers/rules";
+import { customErrorMessage, elementMessage } from "../helpers/messages";
 
 function errorMessage(file, dependency, options) {
   if (options.message) {
@@ -12,22 +10,22 @@ function errorMessage(file, dependency, options) {
   return `Dependency is private of element ${elementMessage(dependency.parents[0])}`;
 }
 
-export default dependencyRule<{ allowUncles?: boolean, message?: string }>(
+export default dependencyRule<{ allowUncles?: boolean; message?: string }>(
   {
     ruleName: RULE_NO_PRIVATE,
-    description: `Prevent importing private elements of another element`,
+    description: "Prevent importing private elements of another element",
     schema: [
       {
         type: "object",
         properties: {
-          allowUncles: {type: "boolean"},
-          message: {type: "string"}
+          allowUncles: { type: "boolean" },
+          message: { type: "string" },
         },
-        additionalProperties: false
-      }
-    ]
+        additionalProperties: false,
+      },
+    ],
   },
-  function ({file, dependency, node, context, options}) {
+  function ({ file, dependency, node, context, options }) {
     if (
       !dependency.isIgnored &&
       dependency.isLocal &&
@@ -41,9 +39,9 @@ export default dependencyRule<{ allowUncles?: boolean, message?: string }>(
       context.report({
         message: errorMessage(file, dependency, options),
         node: node,
-        ...dependencyLocation(node, context)
+        ...dependencyLocation(node, context),
       });
     }
   },
-  {validate: false}
+  { validate: false }
 );

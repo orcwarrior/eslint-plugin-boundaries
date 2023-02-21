@@ -1,12 +1,13 @@
-import {ElementInfo, FileInfo} from "../core/elementsInfo";
-import {DependencyInfo} from "../core/dependencyInfo";
-import {RuleBoundariesBaseConfig} from "../configs/EslintPluginConfig";
-import {ElementRulesAllowDependencyResult} from "../helpers/rules";
+import { ElementInfo, FileInfo } from "../core/elementsInfo";
+import { DependencyInfo } from "../core/dependencyInfo";
+import { RuleBoundariesBaseConfig } from "../configs/EslintPluginConfig";
+import { ElementRulesAllowDependencyResult } from "../helpers/rules";
 
 type RuleMatchingFunction = (
   element: ElementInfo,
   dependency: DependencyInfo,
-  options: RuleBoundariesBaseConfig) => ElementRulesAllowDependencyResult;
+  options: RuleBoundariesBaseConfig
+) => ElementRulesAllowDependencyResult;
 
 type RuleErrorReporterFunction = (
   ruleData: ElementRulesAllowDependencyResult,
@@ -14,4 +15,4 @@ type RuleErrorReporterFunction = (
   dependency: DependencyInfo
 ) => string;
 
-export {RuleMatchingFunction, RuleErrorReporterFunction};
+export { RuleMatchingFunction, RuleErrorReporterFunction };

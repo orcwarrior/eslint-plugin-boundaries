@@ -1,21 +1,16 @@
-import {RULE_ELEMENT_TYPES} from "../constants/settings";
-import {dependencyRule} from "../rules-factories/dependency-rule";
-import {rulesOptionsSchema} from "../helpers/validations";
-import {
-  dependencyLocation,
-  elementRulesAllowDependency,
-  isMatchElementType
-} from "../helpers/rules";
-import {customErrorMessage, elementMessage, ruleElementMessage} from "../helpers/messages";
-import {RuleErrorReporterFunction, RuleMatchingFunction} from "./types";
-
+import { RULE_ELEMENT_TYPES } from "../constants/settings";
+import { dependencyRule } from "../rules-factories/dependency-rule";
+import { rulesOptionsSchema } from "../helpers/validations";
+import { dependencyLocation, elementRulesAllowDependency, isMatchElementType } from "../helpers/rules";
+import { customErrorMessage, elementMessage, ruleElementMessage } from "../helpers/messages";
+import { RuleErrorReporterFunction, RuleMatchingFunction } from "./types";
 
 const elementRulesAllowDependencyType: RuleMatchingFunction = (element, dependency, options) => {
   return elementRulesAllowDependency({
     element,
     dependency,
     options,
-    isMatch: isMatchElementType
+    isMatch: isMatchElementType,
   });
 };
 
@@ -41,17 +36,17 @@ const errorMessage: RuleErrorReporterFunction = (ruleData, file, dependency) => 
 export default dependencyRule(
   {
     ruleName: RULE_ELEMENT_TYPES,
-    description: `Check allowed dependencies between element types`,
-    schema: rulesOptionsSchema()
+    description: "Check allowed dependencies between element types",
+    schema: rulesOptionsSchema(),
   },
-  function({dependency, file, node, context, options}) {
+  function ({ dependency, file, node, context, options }) {
     if (dependency.isLocal && !dependency.isIgnored && dependency.type && !dependency.isInternal) {
       const ruleData = elementRulesAllowDependencyType(file, dependency, options);
       if (!ruleData.result) {
         context.report({
           message: errorMessage(ruleData, file, dependency),
           node,
-          ...dependencyLocation(node, context)
+          ...dependencyLocation(node, context),
         });
       }
     }

@@ -1,6 +1,5 @@
 import { ElementInfo, ElementInfoBase, fileInfo, ImportInfo, importInfo } from "./elementsInfo";
-import {BoundariesRuleContext} from "../rules-factories/dependency-rule";
-
+import { BoundariesRuleContext } from "../rules-factories/dependency-rule";
 
 function getParent(elementInfo: ElementInfo): string {
   const parent = elementInfo.parents && elementInfo.parents[0];
@@ -39,8 +38,15 @@ function isInternal(elementA: ElementInfoBase, elementB: ElementInfoBase): boole
   return elementA.elementPath === elementB.elementPath;
 }
 
-type DependencyRelationship = "internal" | "child" | "descendant"
-| "brother" | "parent" | "uncle" | "ancestor" | null;
+type DependencyRelationship =
+  | "internal"
+  | "child"
+  | "descendant"
+  | "brother"
+  | "parent"
+  | "uncle"
+  | "ancestor"
+  | null;
 
 function dependencyRelationship(dependency, element): DependencyRelationship {
   if (!dependency.isLocal || dependency.isIgnored || !element.type || !dependency.type) {
@@ -72,8 +78,8 @@ function dependencyRelationship(dependency, element): DependencyRelationship {
 
 type DependencyInfo = ImportInfo & {
   relationship: DependencyRelationship;
-  isInternal: boolean
-}
+  isInternal: boolean;
+};
 
 function dependencyInfo(source, context: BoundariesRuleContext): DependencyInfo {
   const elementInfo = fileInfo(context);
@@ -82,9 +88,9 @@ function dependencyInfo(source, context: BoundariesRuleContext): DependencyInfo 
   return {
     ...dependency,
     relationship: dependencyRelationship(dependency, elementInfo),
-    isInternal: isInternal(dependency, elementInfo)
+    isInternal: isInternal(dependency, elementInfo),
   };
 }
 
-export {dependencyInfo};
-export type {DependencyInfo};
+export { dependencyInfo };
+export type { DependencyInfo };

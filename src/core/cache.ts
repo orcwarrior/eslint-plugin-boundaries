@@ -1,4 +1,4 @@
-import {BoundariesConfigSettings} from "../configs/EslintPluginConfig";
+import { BoundariesConfigSettings } from "../configs/EslintPluginConfig";
 
 class Cache {
   cache: Record<string, any>;
@@ -53,8 +53,4 @@ const filesCache = new CachesManager("file");
 const importsCache = new CachesManager("import");
 const elementsCache = new CachesManager("element");
 
-export {
-  filesCache,
-  importsCache,
-  elementsCache
-};
+export { filesCache, importsCache, elementsCache };

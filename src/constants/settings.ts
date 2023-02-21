@@ -1,4 +1,4 @@
-import {PLUGIN_NAME, EslintPluginName} from "./plugin";
+import { PLUGIN_NAME, EslintPluginName } from "./plugin";
 import {
   ELEMENT_TYPES,
   EXTERNAL,
@@ -7,30 +7,30 @@ import {
   NO_UNKNOWN,
   NO_PRIVATE,
   NO_UNKNOWN_FILES,
-  Rules
+  Rules,
 } from "./rules";
 
 type PluginSettingKeys = {
-  ELEMENTS: `${EslintPluginName}/elements`,
-  IGNORE: `${EslintPluginName}/ignore`,
-  INCLUDE: `${EslintPluginName}/include`,
+  ELEMENTS: `${EslintPluginName}/elements`;
+  IGNORE: `${EslintPluginName}/ignore`;
+  INCLUDE: `${EslintPluginName}/include`;
 
   // rules
-  RULE_ELEMENT_TYPES: `${EslintPluginName}/${Rules["ELEMENT_TYPES"]}`,
-  RULE_ENTRY_POINT: `${EslintPluginName}/${Rules["ENTRY_POINT"]}`,
-  RULE_EXTERNAL: `${EslintPluginName}/${Rules["EXTERNAL"]}`,
-  RULE_NO_IGNORED: `${EslintPluginName}/${Rules["NO_IGNORED"]}`,
-  RULE_NO_PRIVATE: `${EslintPluginName}/${Rules["NO_PRIVATE"]}`,
-  RULE_NO_UNKNOWN_FILES: `${EslintPluginName}/${Rules["NO_UNKNOWN_FILES"]}`,
-  RULE_NO_UNKNOWN: `${EslintPluginName}/${Rules["NO_UNKNOWN"]}`,
+  RULE_ELEMENT_TYPES: `${EslintPluginName}/${Rules["ELEMENT_TYPES"]}`;
+  RULE_ENTRY_POINT: `${EslintPluginName}/${Rules["ENTRY_POINT"]}`;
+  RULE_EXTERNAL: `${EslintPluginName}/${Rules["EXTERNAL"]}`;
+  RULE_NO_IGNORED: `${EslintPluginName}/${Rules["NO_IGNORED"]}`;
+  RULE_NO_PRIVATE: `${EslintPluginName}/${Rules["NO_PRIVATE"]}`;
+  RULE_NO_UNKNOWN_FILES: `${EslintPluginName}/${Rules["NO_UNKNOWN_FILES"]}`;
+  RULE_NO_UNKNOWN: `${EslintPluginName}/${Rules["NO_UNKNOWN"]}`;
 
   // deprecated settings
-  TYPES: `${EslintPluginName}/types`,
-  ALIAS: `${EslintPluginName}/alias`,
+  TYPES: `${EslintPluginName}/types`;
+  ALIAS: `${EslintPluginName}/alias`;
 
   // elements settings properties,
-  VALID_MODES: ["folder", "file", "full"]
-}
+  VALID_MODES: ["folder", "file", "full"];
+};
 const settings: PluginSettingKeys = {
   // settings
   ELEMENTS: `${PLUGIN_NAME}/elements`,
@@ -51,7 +51,7 @@ const settings: PluginSettingKeys = {
   ALIAS: `${PLUGIN_NAME}/alias`,
 
   // elements settings properties,
-  VALID_MODES: ["folder", "file", "full"]
+  VALID_MODES: ["folder", "file", "full"],
 };
 
 export const ELEMENTS = settings.ELEMENTS;

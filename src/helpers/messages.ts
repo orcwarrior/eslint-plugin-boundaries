@@ -1,8 +1,7 @@
-import {isArray, isString, replaceObjectValuesInTemplates} from "./utils";
-import {micromatchPatternReplacingObjectsValues} from "./rules";
-import {CapturedValues, ElementInfoBase, FileInfo} from "../core/elementsInfo";
-import {DependencyInfo} from "../core/dependencyInfo";
-
+import { isArray, isString, replaceObjectValuesInTemplates } from "./utils";
+import { micromatchPatternReplacingObjectsValues } from "./rules";
+import { CapturedValues, ElementInfoBase, FileInfo } from "../core/elementsInfo";
+import { DependencyInfo } from "../core/dependencyInfo";
 
 function quote(str: string): string {
   return `'${str}'`;
@@ -24,12 +23,12 @@ function propertiesConcater(properties: any[], index: number): string {
 
 function micromatchPatternMessage(
   micromatchPatterns: string | string[],
-  elementCapturedValues: CapturedValues): string {
+  elementCapturedValues: CapturedValues
+): string {
+  const micromatchPatternsWithValues = micromatchPatternReplacingObjectsValues(micromatchPatterns, {
+    from: elementCapturedValues,
+  });
 
-  const micromatchPatternsWithValues = micromatchPatternReplacingObjectsValues(
-    micromatchPatterns,
-    {from: elementCapturedValues}
-  );
   if (Array.isArray(micromatchPatternsWithValues)) {
     if (micromatchPatternsWithValues.length === 1) {
       return quote(micromatchPatternsWithValues[0]);
@@ -49,7 +48,8 @@ function micromatchPatternMessage(
 
 function capturedValuesMatcherMessage(
   capturedValuesPattern: string | string[],
-  elementCapturedValues: CapturedValues): string {
+  elementCapturedValues: CapturedValues
+): string {
   const capturedValuesPatternKeys = Object.keys(capturedValuesPattern);
   return capturedValuesPatternKeys
     .map((key) => {
@@ -87,17 +87,17 @@ function ruleElementMessage(elementPatterns: string[], elementCapturedValues): s
   return elementMatcherMessage(elementPatterns, elementCapturedValues);
 }
 
-type ElementInfoPartialWithCaptures =
-  Pick<ElementInfoBase, "type" | "internalPath" | "source"> & ElementInfoBase["capturedValues"]
+type ElementInfoPartialWithCaptures = Pick<ElementInfoBase, "type" | "internalPath" | "source"> &
+  ElementInfoBase["capturedValues"];
 
-function elementPropertiesToReplaceInTemplate(element: ElementInfoBase):
-ElementInfoPartialWithCaptures {
-
+function elementPropertiesToReplaceInTemplate(
+  element: ElementInfoBase
+): ElementInfoPartialWithCaptures {
   return {
     ...element.capturedValues,
     type: element.type,
     internalPath: element?.internalPath ?? null,
-    source: element?.source ?? null
+    source: element?.source ?? null,
   };
 }
 
@@ -108,11 +108,7 @@ function customErrorMessage(message, file: FileInfo, dependency: DependencyInfo,
     "dependency"
   );
   replacedMessage = replaceObjectValuesInTemplates(
-    replaceObjectValuesInTemplates(
-      replacedMessage,
-      elementPropertiesToReplaceInTemplate(file),
-      "from"
-    ),
+    replaceObjectValuesInTemplates(replacedMessage, elementPropertiesToReplaceInTemplate(file), "from"),
     elementPropertiesToReplaceInTemplate(dependency),
     "target"
   );
@@ -166,9 +162,4 @@ function elementMessage(elementInfo) {
   )}`;
 }
 
-export {
-  quote,
-  ruleElementMessage,
-  customErrorMessage,
-  elementMessage
-};
+export { quote, ruleElementMessage, customErrorMessage, elementMessage };

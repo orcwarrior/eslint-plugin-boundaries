@@ -1,7 +1,7 @@
-import {Rules, RuleName} from "./constants/rules";
-import {rules} from "./constants/rules";
-import {recommended} from "./configs/recommended";
-import {strict} from "./configs/strict";
+import { Rules, RuleName } from "./constants/rules";
+import { rules } from "./constants/rules";
+import { recommended } from "./configs/recommended";
+import { strict } from "./configs/strict";
 
 const importRules = (ruleNames: Rules): Record<RuleName, any> => {
   return Object.keys(ruleNames).reduce((loadedRules, ruleKey) => {
@@ -21,6 +21,6 @@ export default {
   rules: importRules(rules),
   configs: {
     recommended,
-    strict
-  }
+    strict,
+  },
 };

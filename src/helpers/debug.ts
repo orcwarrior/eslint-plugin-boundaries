@@ -1,4 +1,4 @@
-import {PLUGIN_NAME} from "../constants/plugin";
+import { PLUGIN_NAME } from "../constants/plugin";
 import chalk from "chalk";
 import { ElementInfoBase, FileInfo } from "../core/elementsInfo";
 
@@ -43,9 +43,4 @@ function debugFileInfo(fileInfo: FileInfo & ElementInfoBase): void {
   }
 }
 
-export {
-  debug,
-  success,
-  debugFileInfo,
-  warnOnce
-};
+export { debug, success, debugFileInfo, warnOnce };

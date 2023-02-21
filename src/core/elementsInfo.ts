@@ -98,7 +98,8 @@ function getElementPath(pattern: string, pathSegmentsMatching: string[], fullPat
 /** micromatch captured element subfolders as object keyed by settings "boundaries/elements".capture */
 type CapturedValues = Record<string, string> | null;
 
-type ElementInfo = {
+/** Part shared between element info and fields from its `parents` list. */
+type ElementInfoBase = {
   type: ElementType | null;
   /** Sub-path of the found element ???*/
   elementPath: string | null;
@@ -110,11 +111,15 @@ type ElementInfo = {
   /** TODO: Not entirely sure what it's*/
   internalPath: any | null;
 
-  parents: Omit<ElementInfo, "parents" | "internalPath">[]
+  /** source ??? */
+  source?: string;
+}
+type ElementInfo = ElementInfoBase & {
+  parents: ElementInfoBase[]
 }
 
 function elementTypeAndParents(path: string, settings: BoundariesConfigSettings): ElementInfo {
-  const parents: ElementInfo["parents"] = [];
+  const parents: ElementInfoBase[] = [];
   const elementResult: ElementInfo = {
     type: null,
     elementPath: null,
@@ -192,7 +197,8 @@ function elementTypeAndParents(path: string, settings: BoundariesConfigSettings)
                     type: element.type,
                     elementPath: elementPath,
                     capture: capture,
-                    capturedValues: capturedValues
+                    capturedValues: capturedValues,
+                    internalPath: null
                   });
                 }
               }
@@ -204,10 +210,7 @@ function elementTypeAndParents(path: string, settings: BoundariesConfigSettings)
       {accumulator: [], lastSegmentMatching: 0}
     );
 
-  return {
-    ...elementResult,
-    parents
-  };
+  return {...elementResult, parents};
 }
 
 function replacePathSlashes(absolutePath: string): string {
@@ -227,7 +230,6 @@ type FileInfo = ElementInfo & {
   isIgnored: boolean;
 };
 type ImportInfo = FileInfo & {
-  source,
   isLocal: boolean;
   isBuiltIn: boolean;
   isExternal: boolean;
@@ -309,4 +311,4 @@ export {
   importInfo,
   fileInfo
 };
-export type {CapturedValues, ElementInfo, FileInfo, ImportInfo};
+export type {CapturedValues, ElementInfoBase, ElementInfo, FileInfo, ImportInfo};

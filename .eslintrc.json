@@ -4,14 +4,32 @@
     "es6": true
   },
   "parser": "@typescript-eslint/parser",
-  "parserOptions": { 
+  "parserOptions": {
     "ecmaVersion": "2018"
   },
-  "plugins": ["prettier"],
+  "plugins": [
+    "prettier",
+    "@typescript-eslint",
+    "unused-imports"
+  ],
   "rules": {
     "no-undef": "error",
-    "no-unused-vars": ["error", { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }]
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "vars": "all",
+        "args": "after-used",
+        "ignoreRestSiblings": false
+      }
+    ],
+    "max-len": ["error", { "code": 104,"ignoreComments": true, "ignoreTemplateLiterals": true }],
+    "@typescript-eslint/indent": ["error", 2],
+    "unused-imports/no-unused-imports": "error"
   },
-  "extends": ["prettier"],
+  "extends": [
+    "prettier",
+    "../../../.eslintrc",
+    "plugin:import/typescript"
+  ],
   "root": true
 }

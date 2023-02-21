@@ -1,11 +1,10 @@
-import {createRuleTester, pathResolvers} from "../../support/helpers";
-import {ELEMENT_TYPES as RULE} from "../../../src/constants/rules";
-import {customErrorMessage, elementTypesNoRuleMessage} from "../../support/messages";
-
+import { createRuleTester, pathResolvers } from "../../support/helpers";
+import { ELEMENT_TYPES as RULE } from "../../../src/constants/rules";
+import { customErrorMessage, elementTypesNoRuleMessage } from "../../support/messages";
 
 const rule = require(`../../../src/rules/${RULE}`).default;
 
-const _test = (settings, options, {absoluteFilePath}, errorMessages, base) => {
+const _test = (settings, options, { absoluteFilePath }, errorMessages, base) => {
   const ruleTester = createRuleTester(settings);
 
   ruleTester.run(RULE, rule, {
@@ -14,92 +13,92 @@ const _test = (settings, options, {absoluteFilePath}, errorMessages, base) => {
       {
         filename: absoluteFilePath("app.module.js"),
         code: "import { CatsModule } from './cats/cats.module'",
-        options
+        options,
       },
       // module can import module
       {
         filename: absoluteFilePath("core/core.module.js"),
         code: "import { CatsModule } from '../cats/cats.module'",
-        options
+        options,
       },
       // cats module can import cats controller
       {
         filename: absoluteFilePath("cats/cats.module.js"),
         code: "import { CatsController } from './cats.controller'",
-        options
+        options,
       },
       // cats module can import cats service
       {
         filename: absoluteFilePath("cats/cats.module.js"),
         code: "import { CatsController } from './cats.service'",
-        options
+        options,
       },
       // core module can import core interceptor
       {
         filename: absoluteFilePath("core/core.module.js"),
         code: "import { CatsController } from './interceptors/logging.interceptor'",
-        options
+        options,
       },
       // core module can import core interceptor
       {
         filename: absoluteFilePath("core/core.module.js"),
         code: "import { CatsController } from './interceptors/transform.interceptor'",
-        options
+        options,
       },
       // cats controller can import common decorator
       {
         filename: absoluteFilePath("cats/cats.controller.js"),
         code: "import { Roles } from '../common/decorators/roles.decorator'",
-        options
+        options,
       },
       // cats controller can import common decorator
       {
         filename: absoluteFilePath("cats/cats.controller.js"),
         code: "import { RolesGuard } from '../common/guards/roles.guards'",
-        options
+        options,
       },
       // cats controller can import cats service
       {
         filename: absoluteFilePath("cats/cats.controller.js"),
         code: "import { CatsController } from './cats.service'",
-        options
+        options,
       },
       // cats controller can import cats interface
       {
         filename: absoluteFilePath("cats/cats.controller.js"),
         code: "import { Cat } from './interfaces/cats.interface'",
-        options
+        options,
       },
       // cats controller can import cats dto
       {
         filename: absoluteFilePath("cats/cats.controller.js"),
         code: "import { CreateCatDto } from './dto/create-cat.dto'",
-        options
+        options,
       },
       // cats controller can import persian-cat model
       {
         filename: absoluteFilePath("cats/cats.controller.js"),
         code: "import { PersianCat } from './models/persian-cat.model'",
-        options
+        options,
       },
       // cats controller can import siamese-cat model
       {
         filename: absoluteFilePath("cats/cats.controller.js"),
         code: "import { SiameseCat } from './models/siamese-cat.dto'",
-        options
+        options,
       },
       // core controller can import core model
       {
         filename: absoluteFilePath("core/core.controller.js"),
         code: "import { CoreModel } from './core.model'",
-        options
+        options,
       },
       // cats service can import cats interface
       {
         filename: absoluteFilePath("cats/cats.service.js"),
         code: "import { Cat } from './interfaces/cats.interface'",
-        options
-      }
+        options,
+      },
     ],
     invalid: [
       // App can't import interface
@@ -114,12 +113,12 @@ const _test = (settings, options, {absoluteFilePath}, errorMessages, base) => {
               0,
               elementTypesNoRuleMessage({
                 file: "'app'",
-                dep: "'interface' with base '', feature 'cats' and fileName 'cats'"
+                dep: "'interface' with base '', feature 'cats' and fileName 'cats'",
               })
             ),
-            type: "ImportDeclaration"
-          }
-        ]
+            type: "ImportDeclaration",
+          },
+        ],
       },
       // app can't import cats controller
       {
@@ -133,12 +132,12 @@ const _test = (settings, options, {absoluteFilePath}, errorMessages, base) => {
               1,
               elementTypesNoRuleMessage({
                 file: "'app'",
-                dep: "'controller' with base '', feature 'cats' and fileName 'cats'"
+                dep: "'controller' with base '', feature 'cats' and fileName 'cats'",
               })
             ),
-            type: "ImportDeclaration"
-          }
-        ]
+            type: "ImportDeclaration",
+          },
+        ],
       },
       // app can't import cats service
       {
@@ -152,12 +151,12 @@ const _test = (settings, options, {absoluteFilePath}, errorMessages, base) => {
               2,
               elementTypesNoRuleMessage({
                 file: "'app'",
-                dep: "'service' with base '', feature 'cats' and fileName 'cats'"
+                dep: "'service' with base '', feature 'cats' and fileName 'cats'",
               })
             ),
-            type: "ImportDeclaration"
-          }
-        ]
+            type: "ImportDeclaration",
+          },
+        ],
       },
       // core module can't import cats controller
       {
@@ -171,12 +170,12 @@ const _test = (settings, options, {absoluteFilePath}, errorMessages, base) => {
               3,
               elementTypesNoRuleMessage({
                 file: "'module' with base '', feature 'core' and fileName 'core'",
-                dep: "'controller' with base '', feature 'cats' and fileName 'cats'"
+                dep: "'controller' with base '', feature 'cats' and fileName 'cats'",
               })
             ),
-            type: "ImportDeclaration"
-          }
-        ]
+            type: "ImportDeclaration",
+          },
+        ],
       },
       // core module can't import cats service
       {
@@ -190,12 +189,12 @@ const _test = (settings, options, {absoluteFilePath}, errorMessages, base) => {
               4,
               elementTypesNoRuleMessage({
                 file: "'module' with base '', feature 'core' and fileName 'core'",
-                dep: "'service' with base '', feature 'cats' and fileName 'cats'"
+                dep: "'service' with base '', feature 'cats' and fileName 'cats'",
               })
             ),
-            type: "ImportDeclaration"
-          }
-        ]
+            type: "ImportDeclaration",
+          },
+        ],
       },
       // cats module can't import core interceptor
       {
@@ -209,12 +208,12 @@ const _test = (settings, options, {absoluteFilePath}, errorMessages, base) => {
               5,
               elementTypesNoRuleMessage({
                 file: "'module' with base '', feature 'cats' and fileName 'cats'",
-                dep: "'interceptor' with base '', feature 'core' and fileName 'logging'"
+                dep: "'interceptor' with base '', feature 'core' and fileName 'logging'",
               })
             ),
-            type: "ImportDeclaration"
-          }
-        ]
+            type: "ImportDeclaration",
+          },
+        ],
       },
       // cats module can import core interceptor
       {
@@ -228,12 +227,12 @@ const _test = (settings, options, {absoluteFilePath}, errorMessages, base) => {
               6,
               elementTypesNoRuleMessage({
                 file: "'module' with base '', feature 'cats' and fileName 'cats'",
-                dep: "'interceptor' with base '', feature 'core' and fileName 'transform'"
+                dep: "'interceptor' with base '', feature 'core' and fileName 'transform'",
               })
             ),
-            type: "ImportDeclaration"
-          }
-        ]
+            type: "ImportDeclaration",
+          },
+        ],
       },
       // core controller can't import cats service
       {
@@ -247,12 +246,12 @@ const _test = (settings, options, {absoluteFilePath}, errorMessages, base) => {
               7,
               elementTypesNoRuleMessage({
                 file: "'controller' with base '', feature 'core' and fileName 'core'",
-                dep: "'service' with base '', feature 'cats' and fileName 'cats'"
+                dep: "'service' with base '', feature 'cats' and fileName 'cats'",
               })
             ),
-            type: "ImportDeclaration"
-          }
-        ]
+            type: "ImportDeclaration",
+          },
+        ],
       },
       // core controller can't import cats dto
       {
@@ -266,12 +265,12 @@ const _test = (settings, options, {absoluteFilePath}, errorMessages, base) => {
               8,
               elementTypesNoRuleMessage({
                 file: "'controller' with base '', feature 'core' and fileName 'core'",
-                dep: "'dto' with base '', feature 'cats' and fileName 'create-cat'"
+                dep: "'dto' with base '', feature 'cats' and fileName 'create-cat'",
               })
             ),
-            type: "ImportDeclaration"
-          }
-        ]
+            type: "ImportDeclaration",
+          },
+        ],
       },
       // core controller can't import cats interface
       {
@@ -285,12 +284,12 @@ const _test = (settings, options, {absoluteFilePath}, errorMessages, base) => {
               9,
               elementTypesNoRuleMessage({
                 file: "'controller' with base '', feature 'core' and fileName 'core'",
-                dep: "'interface' with base '', feature 'cats' and fileName 'cats'"
+                dep: "'interface' with base '', feature 'cats' and fileName 'cats'",
               })
             ),
-            type: "ImportDeclaration"
-          }
-        ]
+            type: "ImportDeclaration",
+          },
+        ],
       },
       // core controller can't import cats model
       {
@@ -304,12 +303,12 @@ const _test = (settings, options, {absoluteFilePath}, errorMessages, base) => {
               10,
               elementTypesNoRuleMessage({
                 file: "'controller' with base '', feature 'core' and fileName 'core'",
-                dep: `'model' with base '${base}', feature 'cats' and fileName 'persian-cat'`
+                dep: `'model' with base '${base}', feature 'cats' and fileName 'persian-cat'`,
               })
             ),
-            type: "ImportDeclaration"
-          }
-        ]
+            type: "ImportDeclaration",
+          },
+        ],
       },
       // core controller can't import cats model
       {
@@ -323,12 +322,12 @@ const _test = (settings, options, {absoluteFilePath}, errorMessages, base) => {
               11,
               elementTypesNoRuleMessage({
                 file: "'controller' with base '', feature 'core' and fileName 'core'",
-                dep: `'model' with base '${base}', feature 'cats' and fileName 'siamese-cat'`
+                dep: `'model' with base '${base}', feature 'cats' and fileName 'siamese-cat'`,
               })
             ),
-            type: "ImportDeclaration"
-          }
-        ]
+            type: "ImportDeclaration",
+          },
+        ],
       },
       // cats controller can't import core model
       {
@@ -342,14 +341,14 @@ const _test = (settings, options, {absoluteFilePath}, errorMessages, base) => {
               12,
               elementTypesNoRuleMessage({
                 file: "'controller' with base '', feature 'cats' and fileName 'cats'",
-                dep: `'model' with base '${base}', feature 'core' and fileName 'core'`
+                dep: `'model' with base '${base}', feature 'core' and fileName 'core'`,
               })
             ),
-            type: "ImportDeclaration"
-          }
-        ]
-      }
-    ]
+            type: "ImportDeclaration",
+          },
+        ],
+      },
+    ],
   });
 };
 
@@ -359,33 +358,33 @@ const ruleOptions = [
     rules: [
       {
         from: "app",
-        allow: "module"
+        allow: "module",
       },
       {
         from: "module",
         allow: [
           "module",
-          ["controller", {feature: "${feature}"}],
-          ["service", {feature: "${feature}"}],
-          ["interceptor", {feature: "${feature}"}]
-        ]
+          ["controller", { feature: "${feature}" }],
+          ["service", { feature: "${feature}" }],
+          ["interceptor", { feature: "${feature}" }],
+        ],
       },
       {
         from: "controller",
         allow: [
           "common",
-          ["service", {feature: "${feature}"}],
-          ["interface", {feature: "${feature}"}],
-          ["dto", {feature: "${feature}"}],
-          ["model", {feature: "${feature}"}]
-        ]
+          ["service", { feature: "${feature}" }],
+          ["interface", { feature: "${feature}" }],
+          ["dto", { feature: "${feature}" }],
+          ["model", { feature: "${feature}" }],
+        ],
       },
       {
         from: "service",
-        allow: [["interface", {feature: "${feature}"}]]
-      }
-    ]
-  }
+        allow: [["interface", { feature: "${feature}" }]],
+      },
+    ],
+  },
 ];
 _test(
   {
@@ -393,62 +392,62 @@ _test(
       {
         type: "main",
         mode: "file",
-        pattern: "*/main.js"
+        pattern: "*/main.js",
       },
       {
         type: "app",
         mode: "file",
-        pattern: "*/app.module.js"
+        pattern: "*/app.module.js",
       },
       {
         type: "module",
         pattern: "**/*/*.module.js",
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "controller",
         pattern: "**/*/*.controller.js",
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "model",
         pattern: ["**/*/models/*.{model,dto}.js", "**/*/*.model.js"],
         mode: "full",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "service",
         pattern: ["**/*/*.service.js"],
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "interceptor",
         pattern: ["**/*/interceptors/*.interceptor.js"],
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "interface",
         pattern: "**/*/interfaces/*.interface.js",
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "dto",
         pattern: "**/*/dto/*.dto.js",
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "common",
         pattern: "**/common/*/*.*.js",
         mode: "file",
-        capture: ["base", "category", "fileName"]
-      }
-    ]
+        capture: ["base", "category", "fileName"],
+      },
+    ],
   },
   ruleOptions,
   pathResolvers("nestjs-example"),
@@ -461,76 +460,76 @@ _test(
       {
         type: "main",
         mode: "file",
-        pattern: "*/main.js"
+        pattern: "*/main.js",
       },
       {
         type: "app",
         mode: "file",
-        pattern: "*/app.module.js"
+        pattern: "*/app.module.js",
       },
       {
         type: "module",
         pattern: "**/*/*.module.js",
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "controller",
         pattern: "**/*/*.controller.js",
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "model",
         pattern: "**/*/models/*.{model,dto}.js",
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "model",
         pattern: "*/*/*.model.js",
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "service",
         pattern: ["**/*/*.service.js"],
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "interceptor",
         pattern: ["**/*/interceptors/*.interceptor.js"],
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "interface",
         pattern: "**/*/interfaces/*.interface.js",
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "dto",
         pattern: "**/*/dto/*.dto.js",
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "common",
         pattern: "**/common/*/*.*.js",
         mode: "file",
-        capture: ["base", "category", "fileName"]
-      }
-    ]
+        capture: ["base", "category", "fileName"],
+      },
+    ],
   },
   ruleOptions,
   pathResolvers("nestjs-example"),
   {
     12: elementTypesNoRuleMessage({
       file: "'controller' with base '', feature 'cats' and fileName 'cats'",
-      dep: `'model' with base 'nestjs-example', feature 'core' and fileName 'core'`
-    })
+      dep: "'model' with base 'nestjs-example', feature 'core' and fileName 'core'",
+    }),
   },
   ""
 );
@@ -540,76 +539,76 @@ _test(
       {
         type: "main",
         mode: "file",
-        pattern: "*/main.js"
+        pattern: "*/main.js",
       },
       {
         type: "app",
         mode: "file",
-        pattern: "*/app.module.js"
+        pattern: "*/app.module.js",
       },
       {
         type: "module",
         pattern: "**/*/*.module.js",
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "controller",
         pattern: "**/*/*.controller.js",
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "model",
         pattern: "**/*/models/*.{model,dto}.js",
         mode: "full",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "model",
         pattern: "**/*/*.model.js",
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "service",
         pattern: ["**/*/*.service.js"],
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "interceptor",
         pattern: ["**/*/interceptors/*.interceptor.js"],
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "interface",
         pattern: "**/*/interfaces/*.interface.js",
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "dto",
         pattern: "**/*/dto/*.dto.js",
         mode: "file",
-        capture: ["base", "feature", "fileName"]
+        capture: ["base", "feature", "fileName"],
       },
       {
         type: "common",
         pattern: "**/common/*/*.*.js",
         mode: "file",
-        capture: ["base", "category", "fileName"]
-      }
-    ]
+        capture: ["base", "category", "fileName"],
+      },
+    ],
   },
   ruleOptions,
   pathResolvers("nestjs-example"),
   {
     12: elementTypesNoRuleMessage({
       file: "'controller' with base '', feature 'cats' and fileName 'cats'",
-      dep: `'model' with base '', feature 'core' and fileName 'core'`
-    })
+      dep: "'model' with base '', feature 'core' and fileName 'core'",
+    }),
   },
   "test/fixtures/nestjs-example"
 );

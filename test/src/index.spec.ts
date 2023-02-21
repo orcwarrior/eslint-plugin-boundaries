@@ -1,6 +1,6 @@
 import pluginPackage from "../../src";
 
-const {rules} = require("../../src/constants/rules");
+const { rules } = require("../../src/constants/rules");
 
 describe("package", () => {
   describe("rules property", () => {

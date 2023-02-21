@@ -376,8 +376,7 @@ _testCapture(
   [
     {
       default: "disallow",
-      message:
-        "Importing the file ${dependency.internalPath} is not allowed in ${dependency.type}",
+      message: "Importing the file ${dependency.internalPath} is not allowed in ${dependency.type}",
       rules: [
         {
           target: "helpers",

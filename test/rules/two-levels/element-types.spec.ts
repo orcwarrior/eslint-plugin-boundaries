@@ -101,9 +101,7 @@ const _test = (settings, options, { absoluteFilePath }, errorMessages) => {
       },
       // domain-a module subfiles can import domain-a modules
       {
-        filename: absoluteFilePath(
-          "modules/domain-a/module-a/subfolder-1/subfolder-2/subfolder-2.js"
-        ),
+        filename: absoluteFilePath("modules/domain-a/module-a/subfolder-1/subfolder-2/subfolder-2.js"),
         code: "import ModuleB from 'modules/domain-a/module-b'",
         options,
       },

@@ -198,8 +198,4 @@ const pathResolvers = (basePath) => {
   };
 };
 
-export {
-  SETTINGS,
-  createRuleTester,
-  pathResolvers,
-};
+export { SETTINGS, createRuleTester, pathResolvers };

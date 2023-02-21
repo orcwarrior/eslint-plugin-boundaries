@@ -39,9 +39,7 @@ const _test = (settings) => {
         options,
         settings: {
           ...settings,
-          "boundaries/ignore": [
-            codeFilePath("components/component-a/components/component-c/**/*.js"),
-          ],
+          "boundaries/ignore": [codeFilePath("components/component-a/components/component-c/**/*.js")],
         },
       },
       // Component A is public, as it is not child of any other element, so anyone can use it:

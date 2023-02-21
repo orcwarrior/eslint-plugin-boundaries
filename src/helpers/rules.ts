@@ -1,6 +1,9 @@
 const micromatch = require("micromatch");
 
-const { isArray, replaceObjectValuesInTemplates } = require("./utils");
+const {
+  isArray,
+  replaceObjectValuesInTemplates
+} = require("./utils");
 
 const REPO_URL = "https://github.com/javierbrea/eslint-plugin-boundaries";
 const FROM = "from";
@@ -13,18 +16,22 @@ function docsUrl(ruleName) {
   return `${REPO_URL}/blob/master/docs/rules/${removePluginNamespace(ruleName)}.md`;
 }
 
-function meta({ description, schema = [], ruleName }) {
+function meta({
+                description,
+                schema = [],
+                ruleName
+              }) {
   return {
     meta: {
       type: "problem",
       docs: {
         url: docsUrl(ruleName),
         description,
-        category: "dependencies",
+        category: "dependencies"
       },
       fixable: null,
-      schema,
-    },
+      schema
+    }
   };
 }
 
@@ -35,13 +42,13 @@ function dependencyLocation(node, context) {
     loc: {
       start: {
         line: node.loc.start.line,
-        column: columnStart,
+        column: columnStart
       },
       end: {
         line: node.loc.end.line,
-        column: columnEnd,
-      },
-    },
+        column: columnEnd
+      }
+    }
   };
 }
 
@@ -77,7 +84,10 @@ function rulesMainKey(key) {
 }
 
 function ruleMatch(ruleMatchers, targetElement, isMatch, fromElement) {
-  let match = { result: false, report: null };
+  let match = {
+    result: false,
+    report: null
+  };
   const matchers = !isArray(ruleMatchers) ? [ruleMatchers] : ruleMatchers;
   matchers.forEach((matcher) => {
     if (!match.result) {
@@ -85,7 +95,7 @@ function ruleMatch(ruleMatchers, targetElement, isMatch, fromElement) {
         const [value, captures] = matcher;
         match = isMatch(targetElement, value, captures, {
           from: fromElement.capturedValues,
-          target: targetElement.capturedValues,
+          target: targetElement.capturedValues
         });
       } else {
         match = isMatch(
@@ -94,7 +104,7 @@ function ruleMatch(ruleMatchers, targetElement, isMatch, fromElement) {
           {},
           {
             from: fromElement.capturedValues,
-            target: targetElement.capturedValues,
+            target: targetElement.capturedValues
           }
         );
       }
@@ -116,11 +126,11 @@ function isMatchElementKey(
   );
   if (isMatch && options) {
     return {
-      result: isObjectMatch(options, elementInfo.capturedValues, elementsToCompareCapturedValues),
+      result: isObjectMatch(options, elementInfo.capturedValues, elementsToCompareCapturedValues)
     };
   }
   return {
-    result: isMatch,
+    result: isMatch
   };
 }
 
@@ -137,7 +147,7 @@ function getElementRules(elementInfo, options, mainKey) {
     .map((rule, index) => {
       return {
         ...rule,
-        index,
+        index
       };
     })
     .filter((rule) => {
@@ -156,13 +166,21 @@ function elementToGetRulesFrom(element, dependency, mainKey) {
   return element;
 }
 
+type ElementRulesAllowDependencyParam = {
+  element: any;
+  dependency: any;
+  options: any;
+  isMatch: any;
+  rulesMainKey?: any;
+};
+
 function elementRulesAllowDependency({
-  element,
-  dependency,
-  options,
-  isMatch,
-  rulesMainKey: mainKey,
-}) {
+                                       element,
+                                       dependency,
+                                       options,
+                                       isMatch,
+                                       rulesMainKey: mainKey
+                                     }: ElementRulesAllowDependencyParam) {
   const [result, report, ruleReport] = getElementRules(
     elementToGetRulesFrom(element, dependency, mainKey),
     options,
@@ -179,8 +197,8 @@ function elementRulesAllowDependency({
               element: rule[rulesMainKey(mainKey)],
               disallow: rule.disallow,
               index: rule.index,
-              message: rule.message || options.message,
-            },
+              message: rule.message || options.message
+            }
           ];
         }
       }
@@ -197,18 +215,18 @@ function elementRulesAllowDependency({
       null,
       {
         isDefault: true,
-        message: options.message,
-      },
+        message: options.message
+      }
     ]
   );
   return {
     result,
     report,
-    ruleReport,
+    ruleReport
   };
 }
 
-module.exports = {
+export {
   meta,
   dependencyLocation,
   isObjectMatch,
@@ -217,5 +235,5 @@ module.exports = {
   elementRulesAllowDependency,
   getElementRules,
   rulesMainKey,
-  micromatchPatternReplacingObjectsValues,
+  micromatchPatternReplacingObjectsValues
 };

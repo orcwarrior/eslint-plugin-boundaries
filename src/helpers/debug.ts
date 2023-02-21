@@ -1,5 +1,6 @@
 import {PLUGIN_NAME} from "../constants/plugin";
 import chalk from "chalk";
+import { ElementInfoBase, FileInfo, ImportInfo } from "../core/elementsInfo";
 
 const warns = [];
 const debuggedFiles = [];
@@ -8,28 +9,28 @@ function trace(message, color): void {
   console.log(chalk[color](`[${PLUGIN_NAME}]: ${message}`));
 }
 
-function warn(message): void {
+function warn(message: string): void {
   trace(message, "yellow");
 }
 
-function debug(message): void {
+function debug(message: string): void {
   if (process.env.ESLINT_PLUGIN_BOUNDARIES_DEBUG) {
     trace(message, "grey");
   }
 }
 
-function success(message): void {
+function success(message: string): void {
   trace(message, "green");
 }
 
-function warnOnce(message): void {
+function warnOnce(message: string): void {
   if (!warns.includes(message)) {
     warns.push(message);
     warn(message);
   }
 }
 
-function debugFileInfo(fileInfo): void {
+function debugFileInfo(fileInfo: FileInfo & ElementInfoBase): void {
   const fileInfoKey = fileInfo.path || fileInfo.source;
   if (process.env.ESLINT_PLUGIN_BOUNDARIES_DEBUG && !debuggedFiles.includes(fileInfoKey)) {
     debuggedFiles.push(fileInfoKey);

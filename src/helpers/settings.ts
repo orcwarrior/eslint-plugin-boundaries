@@ -1,21 +1,18 @@
-import {
-  BoundariesConfigSettings,
-  BoundariesElement,
-  ElementType,
-  EslintPluginConfig
-} from "../configs/EslintPluginConfig";
-import { ELEMENTS, TYPES, VALID_MODES } from "../constants/settings";
-import { isString } from "./utils";
+import {BoundariesElement, ElementType, EslintPluginConfig} from "../configs/EslintPluginConfig";
+import {ELEMENTS, TYPES, VALID_MODES} from "../constants/settings";
+import {isString} from "./utils";
 
 
-function isLegacyType(type) {
+function isLegacyType(type): boolean {
   return isString(type);
 }
 
 type Settings = EslintPluginConfig["settings"];
 
 // TODO, remove in next major version
-function transformLegacyTypes(typesFromSettings: Settings["boundaries/elements"] | any): Settings["boundaries/elements"] {
+function transformLegacyTypes(typesFromSettings: Settings["boundaries/elements"] | any):
+Settings["boundaries/elements"] {
+
   const types = typesFromSettings || [];
   return types.map((type) => {
     // backward compatibility with v1

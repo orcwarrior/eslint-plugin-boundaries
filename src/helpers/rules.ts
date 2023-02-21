@@ -196,8 +196,12 @@ type ElementRulesAllowDependencyParam = {
   element: ElementInfo;
   dependency: DependencyInfo;
   options: RuleBoundariesBaseConfig;
+  /** Matcher function that properly
+   * matches found element against the rule */
   isMatch: IsMatchFn;
-  mainKey?: string;
+  /** Key which is used to pick elements that rule will apply to
+   * @default "from" */
+  rulesMainKey?: string;
 };
 type ElementRulesAllowDependencyResult = {
   /** was compliant with rules set?*/
@@ -219,18 +223,18 @@ function elementRulesAllowDependency({
   dependency,
   options,
   isMatch,
-  mainKey = RULE_MAIN_KEY
+  rulesMainKey = RULE_MAIN_KEY
 }: ElementRulesAllowDependencyParam): ElementRulesAllowDependencyResult {
   const [result, report, ruleReport] = getElementRules(
-    elementToGetRulesFrom(element, dependency, mainKey),
+    elementToGetRulesFrom(element, dependency, rulesMainKey),
     options,
-    mainKey
+    rulesMainKey
   ).reduce((allowed, rule) => {
     if (rule.disallow) {
       const match = ruleMatch(rule.disallow, dependency, isMatch, element);
       if (match.result) {
         return [false, match.report, {
-          element: rule[mainKey],
+          element: rule[rulesMainKey],
           disallow: rule.disallow,
           index: rule.index,
           message: rule.message || options.message
@@ -263,4 +267,10 @@ export {
   getElementRules,
   micromatchPatternReplacingObjectsValues
 };
-export type {MicromatchPattern, RuleMeta, ElementsToCompareCapturedValues};
+export type {
+  MicromatchPattern,
+  IsMatchFn,
+  RuleMeta,
+  ElementsToCompareCapturedValues,
+  ElementRulesAllowDependencyResult
+};

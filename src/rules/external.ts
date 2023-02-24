@@ -1,11 +1,6 @@
 import micromatch from "micromatch";
 import { ImportSpecifier } from "estree";
-import {
-  dependencyLocation,
-  elementRulesAllowDependency,
-  IsMatchFn,
-  micromatchPatternReplacingObjectsValues,
-} from "../helpers/rules";
+import { dependencyLocation, elementRulesAllowDependency, IsMatchFn } from "../helpers/rules";
 import { DependencyInfo } from "../core/dependencyInfo";
 import { rulesOptionsSchema } from "../helpers/validations";
 import { customErrorMessage, elementMessage, ruleElementMessage } from "../helpers/messages";
@@ -13,6 +8,7 @@ import { dependencyRule } from "../rules-factories/dependency-rule";
 import { RULE_EXTERNAL } from "../constants/settings";
 import { ElementInfo } from "../core/elementsInfo";
 import { RuleBoundariesBaseConfig } from "../configs/EslintPluginConfig";
+import { replaceObjectValuesInTemplates } from "../helpers/utils";
 
 function specifiersMatch(specifiers: ImportSpecifier[], options, elementsCapturedValues) {
   const importedSpecifiersNames = specifiers
@@ -22,10 +18,7 @@ function specifiersMatch(specifiers: ImportSpecifier[], options, elementsCapture
     .map((specifier) => specifier.imported.name);
 
   return options.reduce((found, option) => {
-    const matcherWithTemplateReplaced = micromatchPatternReplacingObjectsValues(
-      option,
-      elementsCapturedValues
-    );
+    const matcherWithTemplateReplaced = replaceObjectValuesInTemplates(option, elementsCapturedValues);
     if (micromatch.some(importedSpecifiersNames, matcherWithTemplateReplaced)) {
       found.push(option);
     }
@@ -42,10 +35,7 @@ const isMatchExternalDependency: IsMatchFn = (
   options,
   elementsCapturedValues
 ) => {
-  const matcherWithTemplatesReplaced = micromatchPatternReplacingObjectsValues(
-    matcher,
-    elementsCapturedValues
-  );
+  const matcherWithTemplatesReplaced = replaceObjectValuesInTemplates(matcher, elementsCapturedValues);
   const isMatch = micromatch.isMatch(dependency.baseModule, matcherWithTemplatesReplaced);
 
   if (isMatch && options && Object.keys(options).length) {

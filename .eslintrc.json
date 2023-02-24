@@ -3,21 +3,45 @@
     "node": true,
     "es6": true
   },
-  "parserOptions": { 
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
     "ecmaVersion": "2018"
   },
-  "plugins": ["prettier"],
+  "plugins": [
+    "prettier",
+    "@typescript-eslint",
+    "unused-imports"
+  ],
   "rules": {
+    "no-undef": "error",
+    "object-curly-spacing": "off",
+    "object-curly-newline": "off",
+    "comma-dangle": "off",
+    "quotes": ["error", "double", { "avoidEscape": true }],
     "prettier/prettier": [
       "error",
       {
-        "printWidth": 99,
-        "parser": "flow"
+        "parser": "typescript",
+        "printWidth": 104,
+        "endOfLine": "auto"
       }
     ],
-    "no-undef": "error",
-    "no-unused-vars": ["error", { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }]
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "vars": "all",
+        "args": "after-used",
+        "ignoreRestSiblings": false
+      }
+    ],
+    "max-len": ["error", { "code": 104,"ignoreComments": true, "ignoreTemplateLiterals": true, "ignoreStrings": true }],
+    "@typescript-eslint/indent": "off",
+    "unused-imports/no-unused-imports": "error"
   },
-  "extends": ["prettier"],
+  "extends": [
+    "prettier",
+    "../../../.eslintrc",
+    "plugin:import/typescript"
+  ],
   "root": true
 }

@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "target": "ES6",
+    "sourceMap": true,
+    "allowJs": true,
+    "outDir": "dist",
+    "checkJs": true,
+    "lib": ["ES6"]
+  },
+  "include": ["index.js", "./src/**/*"],
+  "exclude": ["node_modules"],
+}

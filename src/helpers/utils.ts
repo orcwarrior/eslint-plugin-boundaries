@@ -8,31 +8,42 @@ function isArray(object): boolean {
   return Array.isArray(object);
 }
 
-function replaceObjectValueInTemplate(
-  template: string,
-  key: string,
-  value: string,
-  namespace?: string
-): string {
-  const keyToReplace = namespace ? `${namespace}.${key}` : key;
-  return template.replace(`\${${keyToReplace}}`, value);
+/** Creates flatten version of any level object.
+ * @example flattenReplacementObject({foo: {bar: "test"}, isFlatten: true}) =>
+ * {"foo.bar": "test", isFlatten: true}*/
+function flattenReplacementObject(object: CapturedValues, keyPrefix?: string): Record<string, string> {
+  if (typeof object === "undefined" || object === null) {
+    return {};
+  }
+  return Object.entries(object).reduce((flatten, [key, value]) => {
+    const fullKey = keyPrefix ? `${keyPrefix}.${key}` : key;
+    return {
+      ...flatten,
+      ...(typeof value === "object"
+        ? flattenReplacementObject(value, fullKey) // Recurrently flatten object-value, passing fullKey as a prefix
+        : { [fullKey]: value }), // regular string - just assign
+    };
+  }, {});
 }
 
-function replaceObjectValuesInTemplates(
-  strings: string | string[],
+function replaceObjectValuesInTemplates<T extends string | string[]>(
+  strings: T,
   object: CapturedValues,
-  namespace?: string
-): string | string[] {
-  return Object.keys(object).reduce((result, objectKey) => {
-    // If template is an array, replace key by value in all patterns
-    if (Array.isArray(result)) {
-      return result.map((resultEntry) => {
-        return replaceObjectValueInTemplate(resultEntry, objectKey, object[objectKey], namespace);
-      });
-    } else {
-      return replaceObjectValueInTemplate(result, objectKey, object[objectKey], namespace);
-    }
-  }, strings);
+  valueProcessorFn: (value: string) => string = (val) => val
+): T {
+  const backwardCompatObject = flattenReplacementObject({
+    ...((object.from as object) ?? {}),
+    ...object,
+  });
+  const capturesEntries = Object.entries(backwardCompatObject);
+
+  const result = (Array.isArray(strings) ? strings : [strings]).map((string) =>
+    capturesEntries.reduce(
+      (acc, [keyToReplace, value]) => acc.replace(`\${${keyToReplace}}`, valueProcessorFn(value)),
+      string
+    )
+  );
+  return Array.isArray(strings) ? result : result[0];
 }
 
 export { isString, isArray, replaceObjectValuesInTemplates };

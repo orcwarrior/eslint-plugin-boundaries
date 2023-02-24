@@ -61,19 +61,10 @@ function dependencyLocation(node, context) {
 
 function micromatchPatternReplacingObjectsValues(
   pattern: MicromatchPattern,
-  object: Partial<ElementsToCompareCapturedValues>
+  object: Partial<ElementsToCompareCapturedValues>,
+  valueProcessorFn?: (value: string) => string
 ) {
-  let patternToReplace = pattern;
-  // Backward compatibility
-  if (object.from) {
-    patternToReplace = replaceObjectValuesInTemplates(patternToReplace, object.from);
-  }
-  return Object.keys(object).reduce((replacedPattern, namespace) => {
-    if (!object[namespace]) {
-      return replacedPattern;
-    }
-    return replaceObjectValuesInTemplates(replacedPattern, object[namespace], namespace);
-  }, patternToReplace);
+  return replaceObjectValuesInTemplates(pattern, object, valueProcessorFn);
 }
 
 function isObjectMatch(

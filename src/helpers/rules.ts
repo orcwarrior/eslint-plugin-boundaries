@@ -59,14 +59,6 @@ function dependencyLocation(node, context) {
   };
 }
 
-function micromatchPatternReplacingObjectsValues(
-  pattern: MicromatchPattern,
-  object: Partial<ElementsToCompareCapturedValues>,
-  valueProcessorFn?: (value: string) => string
-) {
-  return replaceObjectValuesInTemplates(pattern, object, valueProcessorFn);
-}
-
 function isObjectMatch(
   captures: ElementCaptureMatcher,
   object: CapturedValues,
@@ -74,11 +66,11 @@ function isObjectMatch(
 ): boolean {
   return Object.keys(captures).reduce((isMatch, key) => {
     if (isMatch) {
-      const micromatchPattern = micromatchPatternReplacingObjectsValues(
+      const micromatchPattern = replaceObjectValuesInTemplates(
         captures[key],
         objectsWithValuesToReplace
       );
-      return micromatch.isMatch(object[key], micromatchPattern);
+      return micromatch.isMatch(object[key] as string, micromatchPattern);
     }
     return isMatch;
   }, true);
@@ -138,14 +130,14 @@ function wrapRulesInArray(rules: ElementTypeConfig | ElementTypeConfig[]): Eleme
 
 function isMatchElementKey(
   elementInfo: ElementInfo,
-  matcher: MicromatchPattern,
+  pattern: MicromatchPattern,
   captures: ElementCaptureMatcher,
   elementKey: string,
   elementsToCompareCapturedValues: ElementsToCompareCapturedValues
 ): { result: boolean } {
   const isMatch = micromatch.isMatch(
     elementInfo[elementKey],
-    micromatchPatternReplacingObjectsValues(matcher, elementsToCompareCapturedValues)
+    replaceObjectValuesInTemplates(pattern, elementsToCompareCapturedValues)
   );
   if (isMatch && captures) {
     return {
@@ -155,14 +147,11 @@ function isMatchElementKey(
   return { result: isMatch };
 }
 
-function isMatchElementType(
-  elementInfo: ElementInfo,
-  matcher: MicromatchPattern,
-  // TODO: this should be captures: ElementCaptureMatcher instead???
-  captures: ElementCaptureMatcher,
-  elementsToCompareCapturedValues: ElementsToCompareCapturedValues
-) {
-  return isMatchElementKey(elementInfo, matcher, captures, "type", elementsToCompareCapturedValues);
+const isMatchElementType = buildMatcherFn("type");
+/** Builds "regular" elementInfo matcher based on passed key */
+function buildMatcherFn(elementKey: keyof ElementInfo): IsMatchFn {
+  return (elementInfo, pattern, captures, elementsToCompareCapturedValues) =>
+    isMatchElementKey(elementInfo, pattern, captures, elementKey, elementsToCompareCapturedValues);
 }
 
 /** Picks rules that're according to specific ElementType*/
@@ -273,11 +262,11 @@ export {
   meta,
   dependencyLocation,
   isObjectMatch,
+  buildMatcherFn,
   isMatchElementKey,
   isMatchElementType,
   elementRulesAllowDependency,
   getElementRules,
-  micromatchPatternReplacingObjectsValues,
 };
 export type {
   MicromatchPattern,

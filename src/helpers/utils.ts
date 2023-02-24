@@ -26,6 +26,8 @@ function flattenReplacementObject(object: CapturedValues, keyPrefix?: string): R
   }, {});
 }
 
+/** Applies values from object to string(s)-template by first flattening object-keys
+ * then replacing all found bindings occurrences with object values*/
 function replaceObjectValuesInTemplates<T extends string | string[]>(
   strings: T,
   object: CapturedValues,

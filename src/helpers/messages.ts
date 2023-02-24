@@ -1,5 +1,4 @@
 import { isArray, isString, replaceObjectValuesInTemplates } from "./utils";
-import { micromatchPatternReplacingObjectsValues } from "./rules";
 import { CapturedValues, ElementInfoBase, FileInfo } from "../core/elementsInfo";
 import { DependencyInfo } from "../core/dependencyInfo";
 
@@ -25,25 +24,25 @@ function micromatchPatternMessage(
   micromatchPatterns: string | string[],
   elementCapturedValues: CapturedValues
 ): string {
-  const micromatchPatternsWithValues = micromatchPatternReplacingObjectsValues(micromatchPatterns, {
+  const parsedPatternValues = replaceObjectValuesInTemplates(micromatchPatterns, {
     from: elementCapturedValues,
   });
 
-  if (Array.isArray(micromatchPatternsWithValues)) {
-    if (micromatchPatternsWithValues.length === 1) {
-      return quote(micromatchPatternsWithValues[0]);
+  if (Array.isArray(parsedPatternValues)) {
+    if (parsedPatternValues.length === 1) {
+      return quote(parsedPatternValues[0]);
     }
-    return micromatchPatternsWithValues.reduce((message, micromatchPattern, index) => {
+    return parsedPatternValues.reduce((message, micromatchPattern, index) => {
       if (index === 0) {
         return quote(micromatchPattern);
       }
-      if (index === micromatchPatternsWithValues.length - 1) {
+      if (index === parsedPatternValues.length - 1) {
         return `${message} or ${quote(micromatchPattern)}`;
       }
       return `${message}, ${quote(micromatchPattern)}`;
     }, "");
   }
-  return quote(micromatchPatternsWithValues);
+  return quote(parsedPatternValues);
 }
 
 function capturedValuesMatcherMessage(

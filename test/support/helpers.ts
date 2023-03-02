@@ -1,7 +1,7 @@
 const path = require("path");
 const RuleTester = require("eslint").RuleTester;
 
-const codeFilePath = (basePath, relativePath) => {
+const codeFilePath = (basePath: BasePath, relativePath) => {
   return ["test", "fixtures", basePath, relativePath].join("/");
 };
 
@@ -181,6 +181,43 @@ const SETTINGS = {
       },
     },
   },
+  exportsExample: {
+    "boundaries/elements": [
+      {
+        type: "modules",
+        capture: ["moduleName"],
+        pattern: "modules/*/index.js",
+      },
+      {
+        type: "modules-private",
+        pattern: "modules/*/*/*.*",
+        capture: ["moduleName", "functionality"],
+      },
+      {
+        type: "modules-private",
+        pattern: "modules/*/*/**",
+        capture: ["moduleName", "functionality", "device"],
+      },
+      // {
+      //   type: "modules-common",
+      //   pattern: "modules/*/common",
+      //   capture: ["moduleName","filename"],
+      // },
+      // {
+      //   type: "utils",
+      //   pattern: "utils/**/*",
+      //   capture: ["file"],
+      // },
+    ],
+    "import/resolver": {
+      "eslint-import-resolver-node": {},
+      [path.resolve(process.cwd(), "resolver-legacy-alias")]: {
+        helpers: `./${codeFilePath("exports-example", "helpers")}`,
+        components: `./${codeFilePath("exports-example", "components")}`,
+        modules: `./${codeFilePath("exports-example", "modules")}`,
+      },
+    },
+  },
 };
 
 const createRuleTester = (settings) => {
@@ -190,7 +227,15 @@ const createRuleTester = (settings) => {
   });
 };
 
-const pathResolvers = (basePath) => {
+type BasePath =
+  | "base-pattern"
+  | "docs-examples"
+  | "exports-example"
+  | "nestjs-example"
+  | "one-level"
+  | "two-levels"
+  | "two-levels-with-private";
+const pathResolvers = (basePath: BasePath) => {
   return {
     codeFilePath: (relativePath) => codeFilePath(basePath, relativePath),
     relativeFilePath: (relativePath) => relativeFilePath(basePath, relativePath),

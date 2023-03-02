@@ -1,17 +1,17 @@
 import { BoundariesConfigSettings } from "../configs/EslintPluginConfig";
 
-class Cache {
+class Cache<T = any> {
   cache: Record<string, any>;
 
-  constructor(private name: string, public readonly settings: BoundariesConfigSettings) {
+  constructor(private name: string, public readonly settings?: BoundariesConfigSettings) {
     this.cache = {};
   }
 
-  save(key, value) {
+  save(key, value): void {
     this.cache[key] = value;
   }
 
-  load(key) {
+  load(key): T {
     if (this.cache[key]) {
       return this.cache[key];
     }
@@ -53,4 +53,4 @@ const filesCache = new CachesManager("file");
 const importsCache = new CachesManager("import");
 const elementsCache = new CachesManager("element");
 
-export { filesCache, importsCache, elementsCache };
+export { Cache, filesCache, importsCache, elementsCache };

@@ -4,6 +4,7 @@ const rules = {
   ELEMENT_TYPES: "element-types",
   ENTRY_POINT: "entry-point",
   EXTERNAL: "external",
+  EXPORTS: "exports",
   NO_IGNORED: "no-ignored",
   NO_PRIVATE: "no-private",
   NO_UNKNOWN_FILES: "no-unknown-files",
@@ -22,6 +23,7 @@ export { rules };
 export const ELEMENT_TYPES = rules.ELEMENT_TYPES;
 export const ENTRY_POINT = rules.ENTRY_POINT;
 export const EXTERNAL = rules.EXTERNAL;
+export const EXPORTS = rules.EXPORTS;
 export const NO_IGNORED = rules.NO_IGNORED;
 export const NO_PRIVATE = rules.NO_PRIVATE;
 export const NO_UNKNOWN_FILES = rules.NO_UNKNOWN_FILES;

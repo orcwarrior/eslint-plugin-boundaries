@@ -120,6 +120,7 @@ type ElementInfo = ElementInfoBase & {
   parents: ElementInfoBase[];
 };
 
+/** Determines element type based on the path */
 function elementTypeAndParents(path: string, settings: BoundariesConfigSettings): ElementInfo {
   const parents: ElementInfoBase[] = [];
   const elementResult: ElementInfo = {
@@ -149,8 +150,10 @@ function elementTypeAndParents(path: string, settings: BoundariesConfigSettings)
           elementPatterns.forEach((elementPattern) => {
             if (!elementFound) {
               const useFullPathMatch = typeOfMatch === VALID_MODES[2] && !elementResult.type;
+              // DK: Pattern with "." should be treated as full one // TODO: This could case rules regression, pls review!
+              const lastPatterSegmentIncludesDot = elementPattern.split("/").at(-1).includes(".");
               const pattern =
-                typeOfMatch === VALID_MODES[0] && !elementResult.type
+                typeOfMatch === VALID_MODES[0] && !elementResult.type && !lastPatterSegmentIncludesDot
                   ? `${elementPattern}/**/*`
                   : elementPattern;
               let basePatternCapture = true,

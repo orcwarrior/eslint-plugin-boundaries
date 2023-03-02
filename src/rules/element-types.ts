@@ -33,7 +33,7 @@ const errorMessage: RuleErrorReporterFunction = (ruleData, file, dependency) => 
   )}. Disallowed in rule ${ruleReport.index + 1}`;
 };
 
-export default dependencyRule(
+const ruleDefinition = dependencyRule(
   {
     ruleName: RULE_ELEMENT_TYPES,
     description: "Check allowed dependencies between element types",
@@ -52,3 +52,5 @@ export default dependencyRule(
     }
   }
 );
+export default ruleDefinition;
+export { errorMessage as elementTypesErrorMessage };

@@ -97,8 +97,11 @@ function getElementPath(pattern: string, pathSegmentsMatching: string[], fullPat
   });
   return `${[...fullPath].reverse().join("/").split(result)[0]}${result}`;
 }
+
 /** micromatch captured element subfolders as object keyed by settings "boundaries/elements".capture */
-type CapturedValues = Record<string, string> | null;
+type CapturedValues = {
+  [k: string]: string | CapturedValues;
+} | null;
 
 /** Part shared between element info and fields from its `parents` list. */
 type ElementInfoBase = {

@@ -41,14 +41,12 @@ function errorMessage(
     .filter(Boolean)
     .join("\n\t");
 
-  const exportsNames =
-    exportInfo.nodeType === "ExportAllDeclaration"
-      ? "*"
-      : exportInfo.exportsNames.join(", ") || "(no names)";
+  const exportsName =
+    exportInfo.nodeType === "ExportAllDeclaration" ? "*" : exportInfo.exportsName || "(no name)";
 
-  const otherMatchedRulesStr = rulesCount ? ` or any other of matched ${rulesCount} rules.` : "";
+  const otherMatchedRulesStr = rulesCount > 0 ? ` or any other of matched ${rulesCount} rules.` : "";
   return (
-    `Exports of names '${exportsNames}' from path '${exportInfo.path}' wasn't matching rule: ${unmatchedRules}` +
+    `Export of name '${exportsName}' from path '${exportInfo.path}' wasn't matching rule: ${unmatchedRules}` +
     otherMatchedRulesStr
   );
 }
@@ -80,7 +78,7 @@ function testElementTypeOrLocalValidity(context, dependency): boolean {
   }
 }
 
-const ruleEntryPoint: RuleEntryPointFn<RuleExports, ExportedModuleInfo> = ({
+const testDependencyExportValidity: RuleEntryPointFn<RuleExports, ExportedModuleInfo> = ({
   dependency,
   file,
   node,
@@ -109,12 +107,7 @@ const ruleEntryPoint: RuleEntryPointFn<RuleExports, ExportedModuleInfo> = ({
       const exportValidation = validateExports(file, dependency, matchedRules);
       if (!exportValidation.valid) {
         context.report({
-          message: errorMessage(
-            exportValidation,
-            file,
-            dependency,
-            elementTypesMatchedRules.length - 1
-          ),
+          message: errorMessage(exportValidation, file, dependency, matchedRules.length - 1),
           node,
           // Conditional as not all of the exports are based on dependency
           ...(dependency.source ? dependencyLocation(node, context) : {}),
@@ -125,7 +118,7 @@ const ruleEntryPoint: RuleEntryPointFn<RuleExports, ExportedModuleInfo> = ({
 };
 
 const ruleOptions = { validateRules: { onlyMainKey: false } };
-export default {
+const exportsRule = {
   create: (context: BoundariesRuleContext): Rule.RuleListener => {
     const options = context.options[0];
     validateSettings(context.settings);
@@ -137,38 +130,40 @@ export default {
       /**
        * @example: export * from '@module-helpers/module-a */
       ExportAllDeclaration: (node) => {
-        const dependency = exportedModuleInfo(node, context, file);
-        console.log("ExportAllDeclaration: ", { node, dependency });
+        const dependencies = exportedModuleInfo(node, context, file);
 
-        ruleEntryPoint({ file, dependency, options, node, context });
+        dependencies.map((dependency) =>
+          testDependencyExportValidity({ file, dependency, options, node: dependency.node, context })
+        );
       },
       /** Exports multiple values as in export { a, b as c }. If source !== null, re-exports from that module as in export { ... } from "source". */
       ExportNamedDeclaration: (node) => {
-        // TODO:
-        const dependency = exportedModuleInfo(node, context, file);
-        ruleEntryPoint({ file, dependency, options, node: dependency.node, context });
+        const dependencies = exportedModuleInfo(node, context, file);
+
+        dependencies.map((dependency) =>
+          testDependencyExportValidity({ file, dependency, options, node: dependency.node, context })
+        );
       },
       ExportDefaultDeclaration: (node) => {
-        const dependency = exportedModuleInfo(node, context, file);
+        const dependencies = exportedModuleInfo(node, context, file);
 
-        // TODO: dependency.node everywhere!
-        ruleEntryPoint({ file, dependency, options, node: dependency.node, context });
+        dependencies.map((dependency) =>
+          testDependencyExportValidity({ file, dependency, options, node: dependency.node, context })
+        );
       },
       ExportSpecifier: (node) => {
         if (node.parent.type.startsWith("Export")) {
           return;
         }
 
-        const dependency = exportedModuleInfo(node, context, file);
-        // console.log("ExportSpecifier: ", { node });
+        const dependencies = exportedModuleInfo(node, context, file);
 
-        // TODO: Re-enable when it it properly restores values from imports cache
-        ruleEntryPoint({ file, dependency, options, node: dependency.node, context });
+        dependencies.map((dependency) =>
+          testDependencyExportValidity({ file, dependency, options, node: dependency.node, context })
+        );
       },
       ImportDeclaration: (node) => {
         const dependency = dependencyInfo(node.source.value, context);
-        // const localImportName = node.specifiers["0"].local?.name; // TODO: it should preform map
-        // console.log(`ImportDeclaration: store[${localImportName}]=${dependency.path}`);
         storeImport(file, dependency, node);
       },
     };
@@ -181,3 +176,4 @@ export default {
   name: RULE_EXPORTS,
   defaultOptions: undefined,
 } as Rule.RuleModule;
+export { exportsRule as default };

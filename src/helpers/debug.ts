@@ -18,7 +18,6 @@ function debug(message: string): void {
     trace(message, "grey");
   }
 }
-
 function success(message: string): void {
   trace(message, "green");
 }

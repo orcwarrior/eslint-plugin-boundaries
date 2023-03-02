@@ -62,13 +62,13 @@ function singleRuleValidate(
     from: srcElement.capturedValues,
     target: exportInfo.capturedValues,
   };
+  const shouldValidateName =
+    exportInfo.exportsName &&
+    (exportInfo.exportType === "list" || exportInfo.exportType === "declarations");
   const type = exportTypeValidation(exportInfo.exportType, rule.exports.allowedTypes);
-
-  // Iterates over all export names used in specific export block, if any doesn't match allowed names it will fail
-  const name = exportInfo.exportsNames.reduce(
-    (name, exportName) => name.valid && exportNameAllowed(rule.exports, exportName, captures),
-    { valid: true }
-  );
+  const name: SingleValidationResult = shouldValidateName
+    ? exportNameAllowed(rule.exports, exportInfo.exportsName, captures)
+    : { valid: true };
 
   const valid = type.valid && name.valid;
   return { valid, details: { type, name } };

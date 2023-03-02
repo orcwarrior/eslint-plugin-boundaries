@@ -10,10 +10,10 @@ function esTreeExportToExportType(type: ExportedModuleInfo["nodeType"]): RuleExp
       return "all";
     case "ExportDefaultDeclaration":
       return "default";
-
     case "ExportNamedDeclaration":
       return "list";
     default:
+      console.warn(`Node type: "${type}" doesnt match any of defined types`);
       return "default";
   }
 }

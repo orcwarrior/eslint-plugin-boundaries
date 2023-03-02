@@ -30,22 +30,27 @@ function flattenReplacementObject(object: CapturedValues, keyPrefix?: string): R
  * then replacing all found bindings occurrences with object values*/
 function replaceObjectValuesInTemplates<T extends string | string[]>(
   strings: T,
-  object: CapturedValues,
-  valueProcessorFn: (value: string) => string = (val) => val
+  captures: CapturedValues,
+  valueProcessorFn: (value: string) => string = (val) => val,
+  /* true value for removeUnmatchedBinds causes any of ${} binds that doesn't have matching key in captures to be dropped from final string*/
+  removeUnmatchedBinds = false
 ): T {
   const backwardCompatObject = flattenReplacementObject({
-    ...((object.from as object) ?? {}),
-    ...object,
+    ...((captures.from as object) ?? {}),
+    ...captures,
   });
   const capturesEntries = Object.entries(backwardCompatObject);
 
-  const result = (Array.isArray(strings) ? strings : [strings]).map((string) =>
+  let results = (Array.isArray(strings) ? strings : [strings]).map((string) =>
     capturesEntries.reduce(
       (acc, [keyToReplace, value]) => acc.replace(`\${${keyToReplace}}`, valueProcessorFn(value)),
       string
     )
   );
-  return Array.isArray(strings) ? result : result[0];
+  if (removeUnmatchedBinds) {
+    results = results.map((result) => result.replace(/\$\{.+?\}/g, ""));
+  }
+  return Array.isArray(strings) ? results : results[0];
 }
 
 export { isString, isArray, replaceObjectValuesInTemplates };

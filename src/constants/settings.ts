@@ -7,6 +7,7 @@ import {
   NO_UNKNOWN,
   NO_PRIVATE,
   NO_UNKNOWN_FILES,
+  EXPORTS,
   Rules,
 } from "./rules";
 
@@ -19,6 +20,7 @@ type PluginSettingKeys = {
   RULE_ELEMENT_TYPES: `${EslintPluginName}/${Rules["ELEMENT_TYPES"]}`;
   RULE_ENTRY_POINT: `${EslintPluginName}/${Rules["ENTRY_POINT"]}`;
   RULE_EXTERNAL: `${EslintPluginName}/${Rules["EXTERNAL"]}`;
+  RULE_EXPORTS: `${EslintPluginName}/${Rules["EXPORTS"]}`;
   RULE_NO_IGNORED: `${EslintPluginName}/${Rules["NO_IGNORED"]}`;
   RULE_NO_PRIVATE: `${EslintPluginName}/${Rules["NO_PRIVATE"]}`;
   RULE_NO_UNKNOWN_FILES: `${EslintPluginName}/${Rules["NO_UNKNOWN_FILES"]}`;
@@ -41,6 +43,7 @@ const settings: PluginSettingKeys = {
   RULE_ELEMENT_TYPES: `${PLUGIN_NAME}/${ELEMENT_TYPES}`,
   RULE_ENTRY_POINT: `${PLUGIN_NAME}/${ENTRY_POINT}`,
   RULE_EXTERNAL: `${PLUGIN_NAME}/${EXTERNAL}`,
+  RULE_EXPORTS: `${PLUGIN_NAME}/${EXPORTS}`,
   RULE_NO_IGNORED: `${PLUGIN_NAME}/${NO_IGNORED}`,
   RULE_NO_PRIVATE: `${PLUGIN_NAME}/${NO_PRIVATE}`,
   RULE_NO_UNKNOWN_FILES: `${PLUGIN_NAME}/${NO_UNKNOWN_FILES}`,
@@ -60,6 +63,7 @@ export const INCLUDE = settings.INCLUDE;
 export const RULE_ELEMENT_TYPES = settings.RULE_ELEMENT_TYPES;
 export const RULE_ENTRY_POINT = settings.RULE_ENTRY_POINT;
 export const RULE_EXTERNAL = settings.RULE_EXTERNAL;
+export const RULE_EXPORTS = settings.RULE_EXPORTS;
 export const RULE_NO_IGNORED = settings.RULE_NO_IGNORED;
 export const RULE_NO_PRIVATE = settings.RULE_NO_PRIVATE;
 export const RULE_NO_UNKNOWN_FILES = settings.RULE_NO_UNKNOWN_FILES;

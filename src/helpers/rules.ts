@@ -78,10 +78,10 @@ function isObjectMatch(
 
 type RuleMatchResult = {
   result: boolean;
-  /** TODO: couldnt find any case of that value*/
+  /** TODO: couldn't find any case of that value usage*/
   report?: any | null;
 };
-type ElementsToCompareCapturedValues = {
+type ElementsToCompareCapturedValues = CapturedValues & {
   from: CapturedValues;
   target: CapturedValues;
 };
@@ -89,9 +89,12 @@ type IsMatchFn = (
   targetElement: ElementInfo,
   element: ElementType,
   captureValues: ElementCaptureMatcher,
-  elementsToCmpCapturedVals: ElementsToCompareCapturedValues
+  elementsCapturedValues: ElementsToCompareCapturedValues
 ) => RuleMatchResult;
 
+/** Match targetElement (mostly dependencies) with fromElement (file currently validated by a plugin)
+ * using rule matchers (rule.allow or rule.disallow) by using
+ * isMatch function called with target captures and current context (capture values)*/
 function ruleMatch(
   ruleMatchers: ElementTypeConfig | ElementTypeConfig[],
   targetElement: ElementInfo,
@@ -135,6 +138,9 @@ function isMatchElementKey(
   elementKey: string,
   elementsToCompareCapturedValues: ElementsToCompareCapturedValues
 ): { result: boolean } {
+  if (!elementInfo[elementKey]) {
+    return { result: false };
+  }
   const isMatch = micromatch.isMatch(
     elementInfo[elementKey],
     replaceObjectValuesInTemplates(pattern, elementsToCompareCapturedValues)
@@ -154,7 +160,7 @@ function buildMatcherFn(elementKey: keyof ElementInfo): IsMatchFn {
     isMatchElementKey(elementInfo, pattern, captures, elementKey, elementsToCompareCapturedValues);
 }
 
-/** Picks rules that're according to specific ElementType*/
+/** Picks matching rules according to specific ElementType*/
 function getElementRules(
   elementInfo: ElementInfo,
   options: RuleBoundariesBaseConfig,
@@ -258,6 +264,25 @@ function elementRulesAllowDependency({
   return { result, report, ruleReport };
 }
 
+/** Returns rules of options that matches particular element definition
+ * and the dependency */
+function getMatchingRules<T extends RuleBoundariesRule>({
+  element,
+  dependency,
+  options,
+  isMatch,
+  rulesMainKey = RULE_MAIN_KEY,
+}: ElementRulesAllowDependencyParam): Array<T & { index: number }> {
+  return getElementRules(
+    elementToGetRulesFrom(element, dependency, rulesMainKey),
+    options,
+    rulesMainKey
+  ).filter((rule) => {
+    const match = ruleMatch(rule.allow ?? rule.disallow, dependency, isMatch, element);
+    return rule.allow ? match.result : match.result === false;
+  }) as Array<T & { index: number }>;
+}
+
 export {
   meta,
   dependencyLocation,
@@ -265,7 +290,9 @@ export {
   buildMatcherFn,
   isMatchElementKey,
   isMatchElementType,
+  ruleMatch,
   elementRulesAllowDependency,
+  getMatchingRules,
   getElementRules,
 };
 export type {

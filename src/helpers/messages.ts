@@ -100,43 +100,31 @@ function elementPropertiesToReplaceInTemplate(
   };
 }
 
-function customErrorMessage(message, file: FileInfo, dependency: DependencyInfo, report = {}): string {
-  let replacedMessage = replaceObjectValuesInTemplates(
-    replaceObjectValuesInTemplates(message, elementPropertiesToReplaceInTemplate(file), "file"),
-    elementPropertiesToReplaceInTemplate(dependency),
-    "dependency"
-  );
-  replacedMessage = replaceObjectValuesInTemplates(
-    replaceObjectValuesInTemplates(replacedMessage, elementPropertiesToReplaceInTemplate(file), "from"),
-    elementPropertiesToReplaceInTemplate(dependency),
-    "target"
-  );
-  if (file.parents[0]) {
-    replacedMessage = replaceObjectValuesInTemplates(
-      replacedMessage,
-      elementPropertiesToReplaceInTemplate(file.parents[0]),
-      "file.parent"
-    );
-    replacedMessage = replaceObjectValuesInTemplates(
-      replacedMessage,
-      elementPropertiesToReplaceInTemplate(file.parents[0]),
-      "from.parent"
-    );
-  }
-  if (dependency.parents[0]) {
-    replacedMessage = replaceObjectValuesInTemplates(
-      replacedMessage,
-      elementPropertiesToReplaceInTemplate(dependency.parents[0]),
-      "dependency.parent"
-    );
-    replacedMessage = replaceObjectValuesInTemplates(
-      replacedMessage,
-      elementPropertiesToReplaceInTemplate(dependency.parents[0]),
-      "target.parent"
-    );
-  }
-  // TODO: Seems like method could return string[], is safe to assume returned value will be a string?
-  return replaceObjectValuesInTemplates(replacedMessage, report, "report") as string;
+function customErrorMessage(
+  message: string,
+  file: FileInfo,
+  dependency: DependencyInfo,
+  report = {}
+): string {
+  const fileReplacements = {
+    ...elementPropertiesToReplaceInTemplate(file),
+    ...(file.parents[0] ? { parent: elementPropertiesToReplaceInTemplate(file.parents[0]) } : {}),
+  };
+  const dependencyReplacements = {
+    ...elementPropertiesToReplaceInTemplate(dependency),
+    ...(dependency.parents[0]
+      ? { parent: elementPropertiesToReplaceInTemplate(dependency.parents[0]) }
+      : {}),
+  };
+  const fullCapturesObject = {
+    file: fileReplacements,
+    from: fileReplacements,
+    dependency: dependencyReplacements,
+    target: dependencyReplacements,
+    report,
+  };
+
+  return replaceObjectValuesInTemplates(message, fullCapturesObject);
 }
 
 function elementCapturedValuesMessage(capturedValues) {

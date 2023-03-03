@@ -6,12 +6,14 @@ import {
   INCLUDE,
   RULE_ELEMENT_TYPES,
   RULE_ENTRY_POINT,
+  RULE_EXPORTS,
   RULE_EXTERNAL,
   RULE_NO_IGNORED,
   RULE_NO_PRIVATE,
   RULE_NO_UNKNOWN,
   RULE_NO_UNKNOWN_FILES,
 } from "../constants/settings";
+import { RuleExports } from "../rules/exports/schema";
 
 type ElementCaptureMatcher = Record<string, string>;
 /** Type just to note type defined by an user as one of boundaries/elements*/
@@ -29,12 +31,12 @@ type RuleBoundariesBaseConfig = {
 type RuleBoundariesRule = {
   // In this type of files...
   from: ElementTypeConfig[];
-  target: ElementTypeConfig[];
+  target?: ElementTypeConfig[];
   // ...disallow importing this type of elements
-  disallow: ElementTypeConfig[];
-  allow: ElementTypeConfig[];
+  disallow?: ElementTypeConfig[];
+  allow?: ElementTypeConfig[];
   // ...and return this custom error message
-  message: "Helpers must not import other thing than helpers";
+  message?: string;
 };
 type LinterRuleConfig = Linter.RuleLevel | [Linter.RuleLevel];
 type EslintBoundariesRuleConfig<T = RuleBoundariesBaseConfig> =
@@ -54,6 +56,8 @@ type BoundariesConfigRules = {
   /** Check allowed external dependencies by element type
    * @link https://github.com/javierbrea/eslint-plugin-boundaries/blob/master/docs/rules/external.md */
   [RULE_EXTERNAL]: EslintBoundariesRuleConfig;
+
+  [RULE_EXPORTS]: EslintBoundariesRuleConfig<RuleExports>;
 
   /** Prevent importing private elements of another element
    * @link https://github.com/javierbrea/eslint-plugin-boundaries/blob/master/docs/rules/no-private.md */
@@ -111,6 +115,7 @@ export type {
   ElementType,
   ElementCaptureMatcher,
   ElementTypeConfig,
+  RuleAllowance,
   EslintPluginConfig,
   BoundariesElement,
   BoundariesConfigSettings,

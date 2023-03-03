@@ -97,8 +97,11 @@ function getElementPath(pattern: string, pathSegmentsMatching: string[], fullPat
   });
   return `${[...fullPath].reverse().join("/").split(result)[0]}${result}`;
 }
+
 /** micromatch captured element subfolders as object keyed by settings "boundaries/elements".capture */
-type CapturedValues = Record<string, string> | null;
+type CapturedValues = {
+  [k: string]: string | CapturedValues;
+} | null;
 
 /** Part shared between element info and fields from its `parents` list. */
 type ElementInfoBase = {
@@ -120,6 +123,7 @@ type ElementInfo = ElementInfoBase & {
   parents: ElementInfoBase[];
 };
 
+/** Determines element type based on the path */
 function elementTypeAndParents(path: string, settings: BoundariesConfigSettings): ElementInfo {
   const parents: ElementInfoBase[] = [];
   const elementResult: ElementInfo = {
@@ -149,8 +153,10 @@ function elementTypeAndParents(path: string, settings: BoundariesConfigSettings)
           elementPatterns.forEach((elementPattern) => {
             if (!elementFound) {
               const useFullPathMatch = typeOfMatch === VALID_MODES[2] && !elementResult.type;
+              // DK: Pattern with "." should be treated as full one // TODO: This could case rules regression, pls review!
+              const lastPatterSegmentIncludesDot = elementPattern.split("/").at(-1).includes(".");
               const pattern =
-                typeOfMatch === VALID_MODES[0] && !elementResult.type
+                typeOfMatch === VALID_MODES[0] && !elementResult.type && !lastPatterSegmentIncludesDot
                   ? `${elementPattern}/**/*`
                   : elementPattern;
               let basePatternCapture = true,

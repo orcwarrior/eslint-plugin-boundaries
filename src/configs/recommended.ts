@@ -10,6 +10,7 @@ const recommended: EslintPluginConfig = {
     "boundaries/no-private": [2, { allowUncles: true }],
     "boundaries/no-unknown-files": 0,
     "boundaries/no-unknown": 0,
+    "boundaries/exports": 0,
   },
   settings: {
     "boundaries/elements": [],

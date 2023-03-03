@@ -33,8 +33,6 @@ function exportNameAllowed(
     true
   ).map((str) => nameUtils.toConvention(str.trim(), namingConvention));
 
-  console.log({ matcherWithTemplatesReplaced });
-
   const valid = micromatch.any(exportName, matcherWithTemplatesReplaced);
   const errorDetails = valid
     ? undefined
@@ -63,11 +61,11 @@ function singleRuleValidate(
     target: exportInfo.capturedValues,
   };
   const shouldValidateName =
-    exportInfo.exportsName &&
+    exportInfo.exportName &&
     (exportInfo.exportType === "list" || exportInfo.exportType === "declarations");
   const type = exportTypeValidation(exportInfo.exportType, rule.exports.allowedTypes);
   const name: SingleValidationResult = shouldValidateName
-    ? exportNameAllowed(rule.exports, exportInfo.exportsName, captures)
+    ? exportNameAllowed(rule.exports, exportInfo.exportName, captures)
     : { valid: true };
 
   const valid = type.valid && name.valid;

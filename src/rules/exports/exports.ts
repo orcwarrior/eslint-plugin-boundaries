@@ -13,7 +13,7 @@ import { FileInfo, fileInfo } from "../../core/elementsInfo";
 import { RuleExports, RuleExportsRule } from "./schema";
 import { validateRules, validateSettings } from "../../helpers/validations";
 import { Rule } from "eslint";
-import { storeImport } from "./importsStore";
+import { storeImportDeclaration } from "./importsStore";
 import { ExportedModuleInfo, exportedModuleInfo } from "./exportedDependency";
 import { validateExports, ValidateExportsResult } from "./validateExports";
 import { exportsPluginSchema } from "./schema";
@@ -42,7 +42,7 @@ function errorMessage(
     .join("\n\t");
 
   const exportsName =
-    exportInfo.nodeType === "ExportAllDeclaration" ? "*" : exportInfo.exportsName || "(no name)";
+    exportInfo.nodeType === "ExportAllDeclaration" ? "*" : exportInfo.exportName || "(no name)";
 
   const otherMatchedRulesStr = rulesCount > 0 ? ` or any other of matched ${rulesCount} rules.` : "";
   return (
@@ -90,8 +90,7 @@ const testDependencyExportValidity: RuleEntryPointFn<RuleExports, ExportedModule
   if (isMatchedElementTypeOrLocal) {
     {
       // Additional validation of exports field of the rule
-      console.log("validate: ", file, dependency);
-      const elementTypesMatchedRules: RuleExportsRule[] = getMatchingRules<RuleExportsRule>({
+      const elementTypesMatchedRules = getMatchingRules<RuleExportsRule>({
         element: file,
         dependency,
         options: options as RuleBoundariesBaseConfig,
@@ -99,8 +98,11 @@ const testDependencyExportValidity: RuleEntryPointFn<RuleExports, ExportedModule
           return isMatchElementType(element, pattern, captures, elementsToCompareCapturedValues);
         },
       });
+      const matchedElementTypeIdxs = elementTypesMatchedRules.map(({ index }) => index);
+      const unmatchedRules = options.rules.filter((_, idx) => !matchedElementTypeIdxs.includes(idx));
+
       const localMatchedRules = dependency.isLocalDefinition
-        ? options.rules.filter(({ allowLocalDefinitions }) => allowLocalDefinitions)
+        ? unmatchedRules.filter(({ allowLocalDefinitions }) => allowLocalDefinitions)
         : [];
       const matchedRules = [...elementTypesMatchedRules, ...localMatchedRules];
 
@@ -109,7 +111,7 @@ const testDependencyExportValidity: RuleEntryPointFn<RuleExports, ExportedModule
         context.report({
           message: errorMessage(exportValidation, file, dependency, matchedRules.length - 1),
           node,
-          // Conditional as not all of the exports are based on dependency
+          // Conditional as not all the exports are based on dependency
           ...(dependency.source ? dependencyLocation(node, context) : {}),
         });
       }
@@ -151,20 +153,9 @@ const exportsRule = {
           testDependencyExportValidity({ file, dependency, options, node: dependency.node, context })
         );
       },
-      ExportSpecifier: (node) => {
-        if (node.parent.type.startsWith("Export")) {
-          return;
-        }
-
-        const dependencies = exportedModuleInfo(node, context, file);
-
-        dependencies.map((dependency) =>
-          testDependencyExportValidity({ file, dependency, options, node: dependency.node, context })
-        );
-      },
       ImportDeclaration: (node) => {
         const dependency = dependencyInfo(node.source.value, context);
-        storeImport(file, dependency, node);
+        storeImportDeclaration(file, dependency, node);
       },
     };
   },
@@ -176,4 +167,4 @@ const exportsRule = {
   name: RULE_EXPORTS,
   defaultOptions: undefined,
 } as Rule.RuleModule;
-export { exportsRule as default };
+export default exportsRule;

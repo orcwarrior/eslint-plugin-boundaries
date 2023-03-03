@@ -20,9 +20,6 @@ const exportNamesUtils = (separators: RegExp) => ({
   toUpperCase(str: string): string {
     return str.toUpperCase().replace(separators, "");
   },
-  dropSeparators(str: string): string {
-    return str.replace(separators, "");
-  },
   toConvention(str: string, convention: ExportNameConvetion) {
     switch (convention) {
       case "camel":

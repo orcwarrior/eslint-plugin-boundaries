@@ -2,7 +2,7 @@ import { dependencyInfo, DependencyInfo } from "../../core/dependencyInfo";
 import { BoundariesRuleContext } from "../../rules-factories/dependency-rule";
 import { ExportNode } from "./types";
 import { FileInfo } from "../../core/elementsInfo";
-import { lookupImport } from "./importsStore";
+import { getImportDeclaration } from "./importsStore";
 import { Rule } from "eslint";
 import Node = Rule.Node;
 import * as ESTree from "estree";
@@ -12,7 +12,7 @@ type ExportedModuleInfo = DependencyInfo & {
   /** Indicates locally created value beign exported*/
   isLocalDefinition: boolean;
   /** Name of given export-token*/
-  exportsName: string;
+  exportName: string;
   /** Type of export syntax*/
   nodeType:
     | "ExportAllDeclaration"
@@ -26,16 +26,27 @@ type ExportedModuleInfo = DependencyInfo & {
 
 function exportTypes(
   node: ExportNode,
-  specifier?: ESTree.ExportSpecifier
-): Pick<ExportedModuleInfo, "exportType" | "nodeType"> {
+  specifier?: ESTree.ExportSpecifier,
+  file?: FileInfo
+): Pick<ExportedModuleInfo, "exportType" | "nodeType" | "isLocalDefinition"> {
+  // Locally defined exports:
+
   const isDefaultExport =
     node.type === "ExportDefaultDeclaration" || specifier?.exported?.name === "default";
-  return isDefaultExport
-    ? { nodeType: "ExportDefaultDeclaration", exportType: "default" }
-    : {
-        nodeType: node.type,
-        exportType: esTreeExportToExportType(node.type),
-      };
+  if (isDefaultExport) {
+    return { nodeType: "ExportDefaultDeclaration", exportType: "default", isLocalDefinition: false };
+  } else if (specifier && file) {
+    const correspondingDependency = getImportDeclaration(file, specifier.local.name);
+    if (!correspondingDependency) {
+      return { nodeType: node.type, exportType: "declarations", isLocalDefinition: true };
+    }
+  }
+
+  return {
+    nodeType: node.type,
+    exportType: esTreeExportToExportType(node.type),
+    isLocalDefinition: false,
+  };
 }
 
 function exportedModuleInfo(
@@ -49,10 +60,9 @@ function exportedModuleInfo(
     if ("specifiers" in node) {
       return node.specifiers.map((specifier) => ({
         ...dependency,
-        ...exportTypes(node),
-        exportsName: specifier.exported.name,
+        ...exportTypes(node, specifier, file),
+        exportName: specifier.exported.name,
         node,
-        isLocalDefinition: false,
       }));
     } else {
       // Export * declaration
@@ -60,7 +70,7 @@ function exportedModuleInfo(
         {
           ...dependency,
           ...exportTypes(node),
-          exportsName: "", // No name for "*" exports
+          exportName: "", // No name for "*" exports
           node,
           isLocalDefinition: false,
         },
@@ -71,40 +81,35 @@ function exportedModuleInfo(
     // There test multiple exports too!
     const specifiers: Array<ESTree.ExportSpecifier & ESTree.Node> = (node as any)?.specifiers;
     return specifiers.map((specifier) => {
-      const correspondingDependency = lookupImport(file, specifier.local.name);
+      const correspondingDependency = getImportDeclaration(file, specifier.local.name);
       const specifierNode = correspondingDependency?.node || node;
       return {
         ...correspondingDependency,
-        ...exportTypes(node as any, specifier),
+        ...exportTypes(node, specifier, file),
         node: specifierNode,
-        exportsName: specifier.exported.name,
-        isLocalDefinition: !correspondingDependency,
+        exportName: specifier.exported.name,
       };
     });
   } else if ("declaration" in node && node.declaration) {
     if ("name" in node.declaration) {
       // No info on the export source (list or default)
-      const exportName = (node?.declaration as any).name;
-
-      // TODO: This can have multiple corresponding dependencies???
-      //  -> return array?
-      const correspondingDependency = lookupImport(file, node?.declaration.name);
-      // TODO: Retrieve data from the importsStore
+      const correspondingDependency = getImportDeclaration(file, node?.declaration.name);
+      const specifierNode = correspondingDependency?.node ?? node;
       return [
         {
           ...correspondingDependency,
           ...exportTypes(node),
           ...(correspondingDependency ? {} : { exportType: "declarations" }),
-          exportsName: exportName,
-          node: correspondingDependency.node,
-          isLocalDefinition: false,
+          exportName: node?.declaration.name,
+          node: specifierNode, // TODO: Could cause regression
+          isLocalDefinition: !correspondingDependency,
         },
       ];
     } else if ("declarations" in node.declaration) {
       return node.declaration.declarations.map(({ id }) => ({
         ...exportTypes(node),
         exportType: "declarations",
-        exportsName: (id as any).name,
+        exportName: (id as any).name,
         node,
         isLocalDefinition: true,
       })) as any;

@@ -14,7 +14,6 @@ function esTreeExportToExportType(type: ExportedModuleInfo["nodeType"]): RuleExp
       return "list";
     default:
       console.warn(`Node type: "${type}" doesnt match any of defined types`);
-      return "default";
   }
 }
 

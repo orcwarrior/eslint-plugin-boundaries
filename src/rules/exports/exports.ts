@@ -31,6 +31,8 @@ function errorMessage(
     return customErrorMessage(rule.message, file, exportInfo, {
       details: { name, type },
       exports,
+      exportName: exportInfo.exportName,
+      exportType: exportInfo.exportType,
     });
   }
 

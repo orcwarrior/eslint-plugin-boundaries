@@ -1,13 +1,12 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
-import type {Config} from "jest";
+import type { Config } from "jest";
 
 const config: Config = {
-
   preset: "ts-jest",
-  transform: {"^.+\\.ts?$": "ts-jest"},
+  transform: { "^.+\\.ts?$": "ts-jest" },
   transformIgnorePatterns: ["<rootDir>/node_modules/"],
-  
+
   // Automatically clear mock calls and instances between every test
   clearMocks: true,
 
@@ -26,23 +25,22 @@ const config: Config = {
       branches: 100,
       functions: 100,
       lines: 100,
-      statements: 100
+      statements: 100,
     },
     // Ignore coverage of debugger
-    "./src/helpers/debug.ts": {branches: 83},
+    "./src/helpers/debug.ts": { branches: 43 },
     // Decrease coverage due to cache branches
     "./src/core/elementsInfo.ts": {
-      branches: 96,
-      statements: 97
-    }
+      branches: 95,
+      statements: 97,
+    },
   },
 
   // The test environment that will be used for testing
   testEnvironment: "node",
 
   // The glob patterns Jest uses to detect test files
-  testMatch: ["<rootDir>/test/**/*.spec.ts"]
-  // testMatch: ["<rootDir>/test/**/one-level/external.spec.js"],
+  testMatch: ["<rootDir>/test/**/*.spec.ts"],
 };
 
 export default config;

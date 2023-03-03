@@ -23,9 +23,44 @@ function changeRuleExportOption<T extends keyof RuleExportsRule["exports"]>(
   }));
 }
 
-const _test = (settings, options: RuleExports[]) => {
+const _test = (settings, options: RuleExports[], tests) => {
   const ruleTester = createRuleTester(settings);
-  ruleTester.run(RULE, rule, {
+  const _tests = tests(options);
+  ruleTester.run(RULE, rule, _tests);
+};
+
+_test(
+  SETTINGS.exportsExample,
+
+  [
+    {
+      default: "disallow",
+      rules: [
+        {
+          from: ["modules"],
+          allow: [
+            [
+              "modules-private",
+              { moduleName: "${from.moduleName}", functionality: "{create,list,view}" },
+            ],
+            ["utils", { file: "*" }],
+          ],
+          allowLocalDefinitions: true,
+          // Matches "Module-A" "Create" ("Mobile*" /"*")
+          exports: {
+            allowNames: [
+              "${from.moduleName}${target.functionality}(*${target.device}*)",
+              "${from.moduleName}Special*",
+            ],
+            // allowNames: ["${from.domain}","${target.elementName}","*"],
+            // allowNames: ["${from.domain}${from.elementName}"],
+            namingConvention: "pascal",
+          },
+        },
+      ],
+    },
+  ],
+  (options) => ({
     valid: [
       {
         name: "Basic case for allowed export names",
@@ -270,40 +305,19 @@ const _test = (settings, options: RuleExports[]) => {
       //  export {b};
       // It's a bug? It's a feature I dunno but handling this could decrease performance
     ],
-  });
-};
+  })
+);
 
-// disallow-based options
-
-// _test(
-//   SETTINGS.oneLevel,
-//
-//   [
-//     {
-//       default: "disallow",
-//       rules: [
-//         {
-//           from: [["modules", { elementName: "module-a" }]],
-//           allow: ["@module-helpers/${from.elementName}"],
-//         },
-//         // {
-//         //   from: [["modules", { elementName: "ModuleC" }]],
-//         //   allow: [["@module-helpers/all", { specifiers: ["${from.elementName}"] }]],
-//         // },
-//       ],
-//     },
-//   ],
-//   {}
-// );
-
+// testing customErrorMsgs
 _test(
   SETTINGS.exportsExample,
-
   [
     {
       default: "disallow",
       rules: [
         {
+          message:
+            'Custom error message containing source element-type: "${file.type}", export element-type: "${dependency.type}" and it\'s name "${report.exportName}" and type: "${report.exportType}", report details like name validation error cause: "${report.details.name.errorDetails}"',
           from: ["modules"],
           allow: [
             [
@@ -324,21 +338,23 @@ _test(
             namingConvention: "pascal",
           },
         },
-        // {
-        //   from: ["components"],
-        //   allow: ["@module-helpers/${from.domain}"],
-        //   exports: {
-        //     allowNames: ["${target.elementName}*"],
-        //     namingConvention: "pascal",
-        //   },
-        // },
-        // {
-        //   from: [["modules", { elementName: "ModuleC" }]],
-        //   allow: [["@module-helpers/all", { specifiers: ["${from.elementName}"] }]],
-        // },
       ],
     },
-  ]
+  ],
+  (options) => ({
+    valid: [],
+    invalid: [
+      // Export allowed names tests
+      {
+        name: "Testing custom error messages",
+        filename: absoluteFilePath("modules/module-a/index.js"),
+        code: "export {ModuleACreate} from './list';",
+        options,
+        errors: [
+          'Custom error message containing source element-type: "modules", export element-type: "modules-private" and it\'s name "ModuleACreate" and type: "list", ' +
+            'report details like name validation error cause: "Export name "ModuleACreate", allowed expressions: ModuleAList(**), ModuleASpecial*."',
+        ],
+      },
+    ],
+  })
 );
-
-// testing customErrorMsgs

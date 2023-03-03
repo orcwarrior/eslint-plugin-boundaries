@@ -27,171 +27,198 @@ const _test = (settings, options: RuleExports[]) => {
   const ruleTester = createRuleTester(settings);
   ruleTester.run(RULE, rule, {
     valid: [
-      // Basic case
       {
+        name: "Basic case for allowed export names",
         filename: absoluteFilePath("modules/module-a/index.js"),
         code: "export {ModuleAList} from './list';",
         options,
       },
-      // Using 3rd level capture of target.device
       {
+        name: "Using 3rd level capture of target.device",
         filename: absoluteFilePath("modules/module-a/index.js"),
         code: "export {ModuleAListMobile} from './list/mobile';",
         options,
       },
-      // Testing 2nd allowed export name
       {
+        name: "2nd allowed export name rule",
         filename: absoluteFilePath("modules/module-a/index.js"),
-        code: "export {ModuleASpecialSomething} from './view';",
+        code: "export {ModuleAView, ModuleASpecialSomething} from './view';",
         options,
       },
-      // Testing Multiple exports
+
+      // Multiple exports
       {
+        name: "Multiple exports",
         filename: absoluteFilePath("modules/module-a/index.js"),
         code: "export {ModuleASpecialList, ModuleAViewMobile, ModuleAViewDesktop} from './view';",
         options,
       },
-      // camelCase
       {
+        name: "Multiple exports from different sources",
+        filename: absoluteFilePath("modules/module-a/index.js"),
+        code: `import {ModuleAViewMobile} from "./view/mobile";
+        import {ModuleACreateForm} from "./create";
+        const localVar = "foo";
+        export {ModuleAViewMobile, ModuleACreateForm, localVar as ModuleALocalVar};`,
+        options,
+      },
+
+      // Export name-cases
+      {
+        name: "namingConvention: camel",
         filename: absoluteFilePath("modules/module-a/index.js"),
         code: "export {moduleACreate} from './create';",
         options: changeRuleExportOption(options, "namingConvention", "camel"),
       },
-      // snake_uppercase
       {
+        name: "namingConvention: snake_uppercase",
         filename: absoluteFilePath("modules/module-a/index.js"),
         code: "export {MODULE_A_CREATE_SUBITEM} from './create';",
         options: changeRuleExportOption(options, "namingConvention", "snake_uppercase"),
       },
-      // upper
       {
+        name: "namingConvention: upper",
         filename: absoluteFilePath("modules/module-a/index.js"),
         code: "export {MODULEACREATECANNOTREADTHIS} from './create';",
         options: changeRuleExportOption(options, "namingConvention", "upper"),
       },
 
-      // Export * from allowed
+      // Export types
       {
+        name: "Export * (all) type",
         filename: absoluteFilePath("modules/module-a/index.js"),
         code: "export * from 'modules/module-a/list';",
         options,
       },
-
-      // Export default from allowed
       {
+        name: "Export default type",
         filename: absoluteFilePath("modules/module-a/index.js"),
-        code: `import {list as ModuleAList, listHelper} from 'modules/module-a/list';
-        export default ModuleAList;`,
+        code: `import {list as AnyNameYouWant, listHelper} from 'modules/module-a/list';
+        export default AnyNameYouWant; // Name doesn't matter - it's still a default.`,
         options,
       },
-      // Export with separate import and export statement
+
       {
+        name: "Export default from file",
+        filename: absoluteFilePath("modules/module-a/index.js"),
+        code: "export {default} from 'modules/module-a/list';",
+        options,
+      },
+      // Advanced cases
+      {
+        name: "Export-name aliasing",
         filename: absoluteFilePath("modules/module-a/index.js"),
         code: `import {list} from './list/mobile';
           export {list as ModuleAListMobileThingy};`,
         options,
       },
-      // Export with separate import and export statement
       {
+        name: "Export with separate import and export statement",
         filename: absoluteFilePath("modules/module-a/index.js"),
         code: `import {list} from './list/mobile';
         const localValue = 1;
-        export {list as ModuleAListMobileThingy, localValue};`,
+        export {list as ModuleAListMobileThingy, localValue as ModuleALocalValue};`,
         options,
       },
-      // Export local definition:
       {
+        name: "Mixing list and default exports together",
         filename: absoluteFilePath("modules/module-a/index.js"),
-        code: 'export const ModuleAValue = "foo"',
-        options: changeRuleExportOption(options, "allowedTypes", ["declarations"]),
-        errors: [
-          "No rule allowing this dependency was found. File is of type 'modules' with moduleName 'module-b'. Dependency is of type 'modules-private' with moduleName 'module-a' and functionality 'list'",
-        ],
+        code: `import {create as ModuleACreate, someName} from 'modules/module-a/create';
+        export {ModuleACreate, someName as default};`,
+        options: options,
       },
-      // Export local definition - defined ealier:
-      {
-        filename: absoluteFilePath("modules/module-a/index.js"),
-        code: `const ModuleAValue = "foo";
-        export {ModuleAValue}`,
-        options: changeRuleExportOption(options, "allowedTypes", ["list", "declarations"]),
-        errors: [
-          "No rule allowing this dependency was found. File is of type 'modules' with moduleName 'module-b'. Dependency is of type 'modules-private' with moduleName 'module-a' and functionality 'list'",
-        ],
-      },
-      // // TODO: Exports of mixed source:
-      // {
-      //   filename: absoluteFilePath("modules/module-a/ModuleA.js"),
-      //   code: `
-      //   export {someComponent as otherName, someUtility, default}`,
-      //   options,
-      // },
     ],
     invalid: [
-      // Incorrect export name: (target.functionality):
+      // Export allowed names tests
       {
+        name: "Incorrect export name: (target.functionality)",
         filename: absoluteFilePath("modules/module-a/index.js"),
         code: "export {ModuleACreate} from './list';",
         options,
         errors: [
-          "Exports of names 'ModuleACreate' from path 'test/fixtures/exports-example/modules/module-a/list/index.js' wasn't matching rule: Export name \"ModuleACreate\", allowed expressions: ModuleAList(**), ModuleASpecial*.",
+          "Export of name 'ModuleACreate' from path 'test/fixtures/exports-example/modules/module-a/list/index.js' wasn't matching rule: Export name \"ModuleACreate\", allowed expressions: ModuleAList(**), ModuleASpecial*.",
         ],
       },
-      // Incorrect export name: (target.device):
       {
+        name: "Incorrect export name: (target.device)",
         filename: absoluteFilePath("modules/module-a/index.js"),
         code: "export {ModuleACreateDesktop} from './list/mobile';",
         options,
         errors: [
-          "Exports of names 'ModuleACreateDesktop' from path 'test/fixtures/exports-example/modules/module-a/list/mobile/index.js' wasn't matching rule: Export name \"ModuleACreateDesktop\", allowed expressions: ModuleAList(*Mobile*), ModuleASpecial*.",
+          "Export of name 'ModuleACreateDesktop' from path 'test/fixtures/exports-example/modules/module-a/list/mobile/index.js' wasn't matching rule: Export name \"ModuleACreateDesktop\", allowed expressions: ModuleAList(*Mobile*), ModuleASpecial*.",
         ],
       },
-      // Multiple exports with single incorrect one
+      // Multiple exports
       {
+        name: "Multiple exports with single incorrect one",
         filename: absoluteFilePath("modules/module-a/index.js"),
         code: "export {ModuleASpecialList, ModuleAViewDesktop, ModuleAIncorrectExportName} from './view';",
         options,
         errors: [
-          "Exports of names 'ModuleASpecialList, ModuleAViewDesktop, ModuleAIncorrectExportName' from path 'test/fixtures/exports-example/modules/module-a/view/index.js' wasn't matching rule: Export name \"ModuleAIncorrectExportName\", allowed expressions: ModuleAView(**), ModuleASpecial*.",
+          "Export of name 'ModuleAIncorrectExportName' from path 'test/fixtures/exports-example/modules/module-a/view/index.js' wasn't matching rule: Export name \"ModuleAIncorrectExportName\", allowed expressions: ModuleAView(**), ModuleASpecial*.",
         ],
       },
-      // Incorrect export name-case:
+
       {
+        name: "Incorrect export name-case",
         filename: absoluteFilePath("modules/module-a/index.js"),
         code: "export {MODULE_A_CREATE} from './create';",
         options,
         errors: [
-          "Exports of names 'MODULE_A_CREATE' from path 'test/fixtures/exports-example/modules/module-a/create/index.js' wasn't matching rule: Export name \"MODULE_A_CREATE\", allowed expressions: ModuleACreate(**), ModuleASpecial*.",
+          "Export of name 'MODULE_A_CREATE' from path 'test/fixtures/exports-example/modules/module-a/create/index.js' wasn't matching rule: Export name \"MODULE_A_CREATE\", allowed expressions: ModuleACreate(**), ModuleASpecial*.",
         ],
       },
-      // Element-type matched but export name doesn't match "exports.namingConvention"
       {
+        name: 'Element-type matched but export name doesn\'t match "exports.namingConvention"',
         filename: absoluteFilePath("modules/module-a/index.js"),
         code: "export {ModuleAListMobileThingy as WrongName} from './list/mobile';",
         options,
         errors: [
-          "Exports of names 'WrongName' from path 'test/fixtures/exports-example/modules/module-a/list/mobile/index.js' wasn't matching rule: Export name \"WrongName\", allowed expressions: ModuleAList(*Mobile*), ModuleASpecial*.",
+          "Export of name 'WrongName' from path 'test/fixtures/exports-example/modules/module-a/list/mobile/index.js' wasn't matching rule: Export name \"WrongName\", allowed expressions: ModuleAList(*Mobile*), ModuleASpecial*.",
         ],
       },
-      // Exporting * where it's prohibited
+
+      // Export types
       {
+        name: "Exporting * where it's prohibited",
         filename: absoluteFilePath("modules/module-a/index.js"),
         code: "export * from 'modules/module-a/list';",
         options: changeRuleExportOption(options, "allowedTypes", ["declarations", "list"]),
         errors: [
-          "Exports of names '*' from path 'test/fixtures/exports-example/modules/module-a/list/index.js' wasn't matching rule: Export type is \"all\", allowed types \"declarations, list\".",
+          "Export of name '*' from path 'test/fixtures/exports-example/modules/module-a/list/index.js' wasn't matching rule: Export type is \"all\", allowed types \"declarations, list\".",
         ],
       },
-      // Exporting * where it's prohibited
+      // // TODO: Not sure why, but causes "Parsing error: Unexpected token as"
+      // {
+      //   name: "Exporting * as alias where prohibited",
+      //   filename: absoluteFilePath("modules/module-a/index.js"),
+      //   code: "export * as ModuleAIncorrectFunction from './list'",
+      //   options: changeRuleExportOption(options, "allowedTypes", ["declarations", "list"]),
+      //   errors: [
+      //     "Export of name '*' from path 'test/fixtures/exports-example/modules/module-a/list/index.js' wasn't matching rule: Export type is \"all\", allowed types \"declarations, list\".",
+      //   ],
+      // },
       {
+        name: "Export default while it's prohibited",
         filename: absoluteFilePath("modules/module-a/index.js"),
-        code: "export * from 'modules/module-a/list';",
-        options: changeRuleExportOption(options, "allowedTypes", ["declarations", "list"]),
+        code: `import {list as ModuleACreate, listHelper} from 'modules/module-a/create';
+        export default ModuleACreate;`,
+        options: changeRuleExportOption(options, "allowedTypes", ["list"]),
         errors: [
-          "Exports of names '*' from path 'test/fixtures/exports-example/modules/module-a/list/index.js' wasn't matching rule: Export type is \"all\", allowed types \"declarations, list\".",
+          "Export of name 'ModuleACreate' from path 'test/fixtures/exports-example/modules/module-a/create/index.js' wasn't matching rule: Export type is \"default\", allowed types \"list\".",
         ],
       },
-      // Export default from incorrect element-type allowed
       {
+        name: "Export local declaration",
+        filename: absoluteFilePath("modules/module-a/index.js"),
+        code: 'export const ModuleAValue = "foo"',
+        options: changeRuleExportOption(options, "allowedTypes", ["list", "all"]),
+        errors: [
+          "Export of name 'ModuleAValue' from path 'undefined' wasn't matching rule: Export type is \"declarations\", allowed types \"list, all\".",
+        ],
+      },
+      {
+        name: "Export default from incorrect element-type allowed",
         filename: absoluteFilePath("modules/module-b/index.js"),
         code: `import {list as ModuleAList, listHelper} from 'modules/module-a/list';
         export default ModuleAList;`,
@@ -200,50 +227,48 @@ const _test = (settings, options: RuleExports[]) => {
           "No rule allowing this dependency was found. File is of type 'modules' with moduleName 'module-b'. Dependency is of type 'modules-private' with moduleName 'module-a' and functionality 'list'",
         ],
       },
-      // Export default while it's prohibited
+      // Advanced examples
       {
+        name: "Multiple kinds of exports where 1 doesn't match",
         filename: absoluteFilePath("modules/module-a/index.js"),
-        code: `import {list as ModuleACreate, listHelper} from 'modules/module-a/create';
-        export default ModuleACreate;`,
-        options: changeRuleExportOption(options, "allowedTypes", ["list"]),
-        errors: [
-          "Exports of names 'ModuleACreate' from path 'test/fixtures/exports-example/modules/module-a/create/index.js' wasn't matching rule: Export type is \"default\", allowed types \"list\".",
-        ],
-      },
-      // Export default using incorrect name (create "functionality" instead of list)
-      {
-        filename: absoluteFilePath("modules/module-a/index.js"),
-        code: `import {list as ModuleACreate, listHelper} from 'modules/module-a/list';
-        export default ModuleACreate;`,
+        code: `import {create as ModuleACreate} from 'modules/module-a/create';
+        import {list} from 'modules/module-a/list';
+        const localDeclaration = "foo";
+        export {ModuleACreate, localDeclaration, list as ModuleAList};`,
         options: options,
         errors: [
-          "Exports of names 'ModuleACreate' from path 'test/fixtures/exports-example/modules/module-a/list/index.js' wasn't matching rule: Export name \"ModuleACreate\", allowed expressions: ModuleAList(**), ModuleASpecial*.",
+          "Export of name 'localDeclaration' from path 'undefined' wasn't matching rule: Export name \"localDeclaration\", allowed expressions: ModuleA(**), ModuleASpecial*.",
         ],
       },
-      // Export declaration where it's not allowed
       {
+        name: "Export local definition - defined earlier",
         filename: absoluteFilePath("modules/module-a/index.js"),
-        code: `const localValue = "foo";
-        export {localValue as ModuleAList};`,
-        options: changeRuleExportOption(options, "allowedTypes", ["default"]),
+        code: `const ModuleAValue = "foo";
+        export {ModuleAValue};`,
+        options: changeRuleExportOption(options, "allowedTypes", ["list"]),
         errors: [
-          "Exports of names 'ModuleAList' from path 'undefined' wasn't matching rule: Export type is \"declarations\", allowed types \"default\". or any other of matched -1 rules.",
+          "Export of name 'ModuleAValue' from path 'undefined' wasn't matching rule: Export type is \"declarations\", allowed types \"list\".",
         ],
       },
-
-      // // Export declaration where it's not allowed TODO: export dependencies as array'll handle that
-      // {
-      //   filename: absoluteFilePath("modules/module-a/index.js"),
-      //   code: `import {ModuleAList} from './list';
-      //   const localValue = 1;
-      //   export {ModuleAList, localValue};`,
-      //   options: options, //changeRuleExportOption(options, "allowedTypes", ["list", "default"]),
-      //   errors: [
-      //     "Exports of names 'ModuleAValue' from path 'undefined' wasn't matching rule: Export type is \"declarations\", allowed types \"list, default\". or any other of matched -1 rules.",
-      //   ],
-      // },
-      // TODO: Export name export where prohibited
-      // TODO: Naming shenenigans (re-assigning import values)
+      {
+        name: "Having some export of a bunch that doesn't comply with allowed types",
+        filename: absoluteFilePath("modules/module-a/index.js"),
+        code:
+          `import {create as ModuleACreate, someName} from 'modules/module-a/create';
+        import {listMobile as ModuleACreateMobile} from 'modules/module-a/list/mobile'; ` + // #1: Exporting /list/mobile as ModuleACreateMobile
+          "export {ModuleACreate, someName as default, ModuleACreateMobile};", // #2: Exporting default where's not allowed
+        options: changeRuleExportOption(options, "allowedTypes", ["list", "declarations", "all"]),
+        errors: [
+          "Export of name 'default' from path 'test/fixtures/exports-example/modules/module-a/create/index.js' wasn't matching rule: Export type is \"default\", allowed types \"list, declarations, all\".",
+          "Export of name 'ModuleACreateMobile' from path 'test/fixtures/exports-example/modules/module-a/list/mobile/index.js' wasn't matching rule: Export name \"ModuleACreateMobile\", allowed expressions: ModuleAList(*Mobile*), ModuleASpecial*.",
+        ],
+      },
+      // TODO: Settings that doesn't allow local declarations
+      // TODO: Naming shenenigans (re-assigning import values) - not fully supported for cases like
+      //  import {a} from "./a";
+      //  const b = a;
+      //  export {b};
+      // It's a bug? It's a feature I dunno but handling this could decrease performance
     ],
   });
 };
@@ -270,8 +295,6 @@ const _test = (settings, options: RuleExports[]) => {
 //   ],
 //   {}
 // );
-
-// testing naming convention
 
 _test(
   SETTINGS.exportsExample,
@@ -317,3 +340,5 @@ _test(
     },
   ]
 );
+
+// testing customErrorMsgs
